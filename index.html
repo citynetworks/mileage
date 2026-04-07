@@ -367,11 +367,11 @@
       </div>
       <div>
         <div class="field-label">From</div>
-        <input type="text" class="inp" id="f-from" placeholder="Start typing an address..." autocomplete="off" />
+        <input type="text" class="inp" id="f-from" placeholder="Start typing an address..." autocomplete="new-password" spellcheck="false" />
       </div>
       <div>
         <div class="field-label">To</div>
-        <input type="text" class="inp" id="f-to" placeholder="Start typing an address..." autocomplete="off" />
+        <input type="text" class="inp" id="f-to" placeholder="Start typing an address..." autocomplete="new-password" spellcheck="false" />
       </div>
       <div>
         <div class="field-label">Miles <span style="color:var(--dim);font-size:9px;letter-spacing:0;">(auto)</span></div>
@@ -531,20 +531,51 @@ function loadGoogleMaps(key) {
 
 window._gmapsLoaded = function() {
   gmapsReady = true;
-  bindAutocomplete();
+  // If form is already open, bind immediately
+  if ($("form-wrap").classList.contains("open")) bindAutocomplete();
 };
 
+let acFrom = null;
+let acTo   = null;
+
 function bindAutocomplete() {
-  const opts = { types: ["geocode", "establishment"] };
-  const acFrom = new google.maps.places.Autocomplete($("f-from"), opts);
-  const acTo   = new google.maps.places.Autocomplete($("f-to"),   opts);
+  if (!gmapsReady) return;
 
-  acFrom.addListener("place_changed", () => { fromSelected = true;  maybeCalcDistance(); });
-  acTo.addListener("place_changed",   () => { toSelected   = true;  maybeCalcDistance(); });
+  const fromEl = $("f-from");
+  const toEl   = $("f-to");
 
-  // Reset flags when user edits manually
-  $("f-from").addEventListener("input", () => { fromSelected = false; resetMiles(); });
-  $("f-to").addEventListener("input",   () => { toSelected   = false; resetMiles(); });
+  // Destroy old instances cleanly by replacing elements in place
+  // (Autocomplete attaches pac-container to body globally, just rebind)
+  acFrom = new google.maps.places.Autocomplete(fromEl, {
+    types: ["geocode", "establishment"],
+    fields: ["formatted_address", "geometry", "name"],
+  });
+  acTo = new google.maps.places.Autocomplete(toEl, {
+    types: ["geocode", "establishment"],
+    fields: ["formatted_address", "geometry", "name"],
+  });
+
+  acFrom.addListener("place_changed", () => {
+    const p = acFrom.getPlace();
+    if (p && (p.formatted_address || p.name)) {
+      fromEl.value = p.formatted_address || p.name;
+      fromSelected = true;
+      maybeCalcDistance();
+    }
+  });
+
+  acTo.addListener("place_changed", () => {
+    const p = acTo.getPlace();
+    if (p && (p.formatted_address || p.name)) {
+      toEl.value = p.formatted_address || p.name;
+      toSelected  = true;
+      maybeCalcDistance();
+    }
+  });
+
+  // Manual edits reset the auto-calc
+  fromEl.oninput = () => { fromSelected = false; resetMiles(); };
+  toEl.oninput   = () => { toSelected   = false; resetMiles(); };
 }
 
 function setMilesHint(text, cls) {
@@ -689,6 +720,8 @@ function openForm(isEdit) {
   $("form-title").textContent = isEdit ? "✏️ Edit Trip" : "➕ New Trip";
   $("submit-btn").textContent = isEdit ? "Save" : "Add";
   $("add-btn").textContent    = "− Close";
+  // Rebind autocomplete each time the fields become visible
+  bindAutocomplete();
 }
 
 function closeForm() {
