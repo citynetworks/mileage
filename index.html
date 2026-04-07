@@ -558,39 +558,37 @@ window._gmapsLoaded = function() {
   if ($("form-wrap").classList.contains("open")) bindAutocomplete();
 };
 
-// Track mounted autocomplete elements
-let acFromEl = null;
-let acToEl   = null;
+// Store resolved addresses for distance calc
+let fromAddr = "";
+let toAddr   = "";
 
 function bindAutocomplete() {
   if (!gmapsReady) return;
 
-  // Use new PlaceAutocompleteElement (required for keys created after March 2025)
-  mountPlaceAC("from-ac-wrap", "f-from", (addr) => {
+  mountPlaceAC("from-ac-wrap", (addr) => {
+    fromAddr = addr;
     $("f-from").value = addr;
     fromSelected = true;
     maybeCalcDistance();
-  }, () => { fromSelected = false; resetMiles(); });
+  }, () => { fromSelected = false; fromAddr = ""; resetMiles(); });
 
-  mountPlaceAC("to-ac-wrap", "f-to", (addr) => {
+  mountPlaceAC("to-ac-wrap", (addr) => {
+    toAddr = addr;
     $("f-to").value = addr;
     toSelected = true;
     maybeCalcDistance();
-  }, () => { toSelected = false; resetMiles(); });
+  }, () => { toSelected = false; toAddr = ""; resetMiles(); });
 }
 
-function mountPlaceAC(wrapId, hiddenId, onSelect, onInput) {
+function mountPlaceAC(wrapId, onSelect, onInput) {
   const wrap = $(wrapId);
   if (!wrap) return;
-
-  // Clear previous element
   wrap.innerHTML = "";
 
   const ac = new google.maps.places.PlaceAutocompleteElement({
     types: ["geocode", "establishment"],
   });
 
-  // Style to match the rest of the form
   ac.style.cssText = `
     width: 100%;
     --gmpx-color-surface: #161b22;
@@ -605,12 +603,11 @@ function mountPlaceAC(wrapId, hiddenId, onSelect, onInput) {
 
   ac.addEventListener("gmp-placeselect", async (e) => {
     const place = e.placePrediction.toPlace();
-    await place.fetchFields({ fields: ["formattedAddress", "displayName"] });
+    await place.fetchFields({ fields: ["formattedAddress", "displayName", "location"] });
     const addr = place.formattedAddress || place.displayName?.text || "";
     onSelect(addr);
   });
 
-  // Hidden input tracks manual typing for reset
   ac.addEventListener("input", onInput);
 }
 
@@ -630,8 +627,8 @@ function resetMiles() {
 
 function maybeCalcDistance() {
   if (!fromSelected || !toSelected) return;
-  const origin = $("f-from").value.trim();
-  const dest   = $("f-to").value.trim();
+  const origin = fromAddr || $("f-from").value.trim();
+  const dest   = toAddr   || $("f-to").value.trim();
   if (!origin || !dest) return;
 
   // Loading state
@@ -776,6 +773,8 @@ function resetFormFields() {
   $("f-notes").value   = "";
   fromSelected = false;
   toSelected   = false;
+  fromAddr     = "";
+  toAddr       = "";
   resetMiles();
   // Clear the PlaceAutocompleteElement inputs visually
   const fromInput = document.querySelector("#from-ac-wrap input");
