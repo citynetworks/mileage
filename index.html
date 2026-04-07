@@ -173,6 +173,27 @@
 
     .rate-inp { width: 72px; text-align: center; }
 
+    /* ── PlaceAutocompleteElement (new Places API) ── */
+    gmp-placeautocomplete {
+      width: 100%;
+    }
+    gmp-placeautocomplete input {
+      background: var(--surface) !important;
+      border: 1px solid var(--border2) !important;
+      color: var(--text) !important;
+      padding: 8px 10px !important;
+      border-radius: 6px !important;
+      font-family: 'DM Mono', monospace !important;
+      font-size: 12px !important;
+      width: 100% !important;
+      outline: none !important;
+      box-shadow: none !important;
+    }
+    gmp-placeautocomplete input:focus {
+      border-color: var(--blue) !important;
+    }
+
+    /* ── Legacy pac-container (fallback) ── */
     /* Google autocomplete dropdown */
     .pac-container {
       background: #1c2128 !important;
@@ -367,11 +388,13 @@
       </div>
       <div>
         <div class="field-label">From</div>
-        <input type="text" class="inp" id="f-from" placeholder="Start typing an address..." autocomplete="new-password" spellcheck="false" />
+        <div id="from-ac-wrap" style="width:100%;"></div>
+        <input type="hidden" id="f-from" />
       </div>
       <div>
         <div class="field-label">To</div>
-        <input type="text" class="inp" id="f-to" placeholder="Start typing an address..." autocomplete="new-password" spellcheck="false" />
+        <div id="to-ac-wrap" style="width:100%;"></div>
+        <input type="hidden" id="f-to" />
       </div>
       <div>
         <div class="field-label">Miles <span style="color:var(--dim);font-size:9px;letter-spacing:0;">(auto)</span></div>
@@ -524,7 +547,7 @@ function loadGoogleMaps(key) {
   const s = document.createElement("script");
   s.dataset.gmaps = "1";
   s.async = true;
-  s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&libraries=places&callback=_gmapsLoaded`;
+  s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&libraries=places,marker&v=weekly&callback=_gmapsLoaded`;
   s.onerror = () => showModal("Failed to load Google Maps. Check that your key is valid and the APIs are enabled in Google Cloud Console.");
   document.head.appendChild(s);
 }
@@ -535,47 +558,60 @@ window._gmapsLoaded = function() {
   if ($("form-wrap").classList.contains("open")) bindAutocomplete();
 };
 
-let acFrom = null;
-let acTo   = null;
+// Track mounted autocomplete elements
+let acFromEl = null;
+let acToEl   = null;
 
 function bindAutocomplete() {
   if (!gmapsReady) return;
 
-  const fromEl = $("f-from");
-  const toEl   = $("f-to");
+  // Use new PlaceAutocompleteElement (required for keys created after March 2025)
+  mountPlaceAC("from-ac-wrap", "f-from", (addr) => {
+    $("f-from").value = addr;
+    fromSelected = true;
+    maybeCalcDistance();
+  }, () => { fromSelected = false; resetMiles(); });
 
-  // Destroy old instances cleanly by replacing elements in place
-  // (Autocomplete attaches pac-container to body globally, just rebind)
-  acFrom = new google.maps.places.Autocomplete(fromEl, {
+  mountPlaceAC("to-ac-wrap", "f-to", (addr) => {
+    $("f-to").value = addr;
+    toSelected = true;
+    maybeCalcDistance();
+  }, () => { toSelected = false; resetMiles(); });
+}
+
+function mountPlaceAC(wrapId, hiddenId, onSelect, onInput) {
+  const wrap = $(wrapId);
+  if (!wrap) return;
+
+  // Clear previous element
+  wrap.innerHTML = "";
+
+  const ac = new google.maps.places.PlaceAutocompleteElement({
     types: ["geocode", "establishment"],
-    fields: ["formatted_address", "geometry", "name"],
-  });
-  acTo = new google.maps.places.Autocomplete(toEl, {
-    types: ["geocode", "establishment"],
-    fields: ["formatted_address", "geometry", "name"],
   });
 
-  acFrom.addListener("place_changed", () => {
-    const p = acFrom.getPlace();
-    if (p && (p.formatted_address || p.name)) {
-      fromEl.value = p.formatted_address || p.name;
-      fromSelected = true;
-      maybeCalcDistance();
-    }
+  // Style to match the rest of the form
+  ac.style.cssText = `
+    width: 100%;
+    --gmpx-color-surface: #161b22;
+    --gmpx-color-on-surface: #e6edf3;
+    --gmpx-color-on-surface-variant: #8b949e;
+    --gmpx-color-primary: #58a6ff;
+    --gmpx-font-family-base: 'DM Mono', monospace;
+    --gmpx-font-size-base: 12px;
+  `;
+
+  wrap.appendChild(ac);
+
+  ac.addEventListener("gmp-placeselect", async (e) => {
+    const place = e.placePrediction.toPlace();
+    await place.fetchFields({ fields: ["formattedAddress", "displayName"] });
+    const addr = place.formattedAddress || place.displayName?.text || "";
+    onSelect(addr);
   });
 
-  acTo.addListener("place_changed", () => {
-    const p = acTo.getPlace();
-    if (p && (p.formatted_address || p.name)) {
-      toEl.value = p.formatted_address || p.name;
-      toSelected  = true;
-      maybeCalcDistance();
-    }
-  });
-
-  // Manual edits reset the auto-calc
-  fromEl.oninput = () => { fromSelected = false; resetMiles(); };
-  toEl.oninput   = () => { toSelected   = false; resetMiles(); };
+  // Hidden input tracks manual typing for reset
+  ac.addEventListener("input", onInput);
 }
 
 function setMilesHint(text, cls) {
@@ -741,6 +777,11 @@ function resetFormFields() {
   fromSelected = false;
   toSelected   = false;
   resetMiles();
+  // Clear the PlaceAutocompleteElement inputs visually
+  const fromInput = document.querySelector("#from-ac-wrap input");
+  const toInput   = document.querySelector("#to-ac-wrap input");
+  if (fromInput) fromInput.value = "";
+  if (toInput)   toInput.value   = "";
 }
 
 function submitForm() {
@@ -782,7 +823,13 @@ function startEdit(id) {
   resetMiles();
   setMilesHint("Re-select addresses to recalculate, or edit miles directly");
   openForm(true);
-  $("f-from").focus();
+  // Populate PlaceAutocompleteElement visible inputs
+  setTimeout(() => {
+    const fromInput = document.querySelector("#from-ac-wrap input");
+    const toInput   = document.querySelector("#to-ac-wrap input");
+    if (fromInput) fromInput.value = trip.from;
+    if (toInput)   toInput.value   = trip.to;
+  }, 50);
 }
 
 function deleteTrip(id) {
