@@ -21,7 +21,6 @@
       --green: #3fb950;
       --red: #f85149;
       --purple: #d2a8ff;
-      --yellow: #f59e0b;
       --accent-green: #238636;
     }
 
@@ -36,6 +35,80 @@
     ::-webkit-scrollbar { width: 4px; height: 4px; }
     ::-webkit-scrollbar-track { background: var(--bg); }
     ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+    /* ── API Key Modal ── */
+    #api-modal {
+      position: fixed; inset: 0; z-index: 999;
+      background: rgba(0,0,0,0.85);
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px;
+      backdrop-filter: blur(4px);
+    }
+    #api-modal.hidden { display: none; }
+
+    #api-box {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 14px;
+      padding: 36px 40px;
+      max-width: 520px;
+      width: 100%;
+      animation: fadeIn 0.25s ease;
+    }
+
+    #api-box h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    #api-box p {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.8;
+      margin-bottom: 20px;
+    }
+
+    #api-box a { color: var(--blue); text-decoration: none; }
+    #api-box a:hover { text-decoration: underline; }
+
+    #api-key-input {
+      background: var(--bg);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      width: 100%;
+      outline: none;
+      margin-bottom: 14px;
+      transition: border-color 0.15s;
+      letter-spacing: 0.04em;
+    }
+    #api-key-input:focus { border-color: var(--blue); }
+    #api-key-input::placeholder { color: var(--dim); letter-spacing: 0; }
+
+    #api-error {
+      color: var(--red);
+      font-size: 11px;
+      margin-bottom: 12px;
+      display: none;
+      line-height: 1.6;
+    }
+
+    .modal-note {
+      margin-top: 18px;
+      padding: 12px 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 11px;
+      color: var(--dim);
+      line-height: 1.7;
+    }
+    .modal-note strong { color: var(--muted); }
 
     /* ── Header ── */
     #header {
@@ -52,35 +125,24 @@
       z-index: 100;
     }
 
-    #header h1 {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: 20px;
-      letter-spacing: -0.3px;
-      color: #fff;
-    }
+    #header h1 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; letter-spacing: -0.3px; color: #fff; }
+    .sub { color: var(--muted); font-size: 11px; margin-top: 2px; }
+    #header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
-    #header .sub {
-      color: var(--muted);
-      font-size: 11px;
-      margin-top: 2px;
+    #key-badge {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--bg); border: 1px solid var(--border2);
+      border-radius: 20px; padding: 4px 10px;
+      font-size: 11px; color: var(--muted); cursor: pointer;
+      transition: border-color 0.15s;
     }
-
-    #header-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
+    #key-badge:hover { border-color: var(--blue); color: var(--text); }
+    #key-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
 
     /* ── Buttons ── */
     .btn {
-      cursor: pointer;
-      border: none;
-      border-radius: 6px;
-      font-family: 'DM Mono', monospace;
-      font-size: 12px;
-      padding: 7px 14px;
+      cursor: pointer; border: none; border-radius: 6px;
+      font-family: 'DM Mono', monospace; font-size: 12px; padding: 7px 14px;
       transition: opacity 0.15s, transform 0.1s;
     }
     .btn:hover { opacity: 0.82; transform: translateY(-1px); }
@@ -90,7 +152,7 @@
     .btn-danger { background: transparent; color: var(--red); border: 1px solid var(--border2); padding: 4px 10px; font-size: 11px; }
     .btn-edit { background: #21262d; color: var(--muted); border: 1px solid var(--border2); padding: 4px 10px; font-size: 11px; }
 
-    /* ── Form inputs ── */
+    /* ── Inputs ── */
     .inp {
       background: var(--surface);
       border: 1px solid var(--border2);
@@ -111,60 +173,66 @@
 
     .rate-inp { width: 72px; text-align: center; }
 
-    /* ── Main layout ── */
-    #main {
-      max-width: 1120px;
-      margin: 0 auto;
-      padding: 28px 24px 60px;
+    /* Google autocomplete dropdown */
+    .pac-container {
+      background: #1c2128 !important;
+      border: 1px solid var(--border2) !important;
+      border-radius: 8px !important;
+      margin-top: 4px !important;
+      font-family: 'DM Mono', monospace !important;
+      font-size: 12px !important;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.55) !important;
     }
-
-    /* ── Summary cards ── */
-    #cards {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
-      margin-bottom: 24px;
+    .pac-item {
+      padding: 8px 12px !important;
+      color: var(--muted) !important;
+      border-top: 1px solid var(--border) !important;
+      cursor: pointer !important;
     }
+    .pac-item:first-child { border-top: none !important; }
+    .pac-item:hover, .pac-item-selected { background: #21262d !important; color: var(--text) !important; }
+    .pac-item-query { color: var(--text) !important; font-size: 12px !important; }
+    .pac-matched { color: var(--blue) !important; font-weight: 600 !important; }
+    .pac-icon, .pac-logo { display: none !important; }
 
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 18px 22px;
-    }
+    /* Miles field states */
+    .miles-auto { border-color: var(--green) !important; color: var(--green) !important; }
+    .miles-calculating { border-color: var(--blue) !important; }
 
-    .card-label {
-      color: var(--muted);
-      font-size: 10px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      margin-bottom: 6px;
-    }
-
-    .card-value {
-      font-family: 'Syne', sans-serif;
-      font-size: 28px;
-      font-weight: 800;
-      line-height: 1;
-    }
-
-    .card-unit {
-      color: var(--dim);
-      font-size: 11px;
-      margin-top: 4px;
-    }
-
-    /* ── Add form ── */
-    #form-wrap {
-      background: var(--surface);
-      border: 1px solid var(--border2);
-      border-radius: 10px;
-      padding: 22px;
-      margin-bottom: 22px;
+    .miles-wrap { position: relative; }
+    .spin-ring {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      width: 12px; height: 12px;
+      border: 2px solid var(--border2);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
       display: none;
-      animation: fadeIn 0.25s ease;
     }
+    .miles-wrap.loading .spin-ring { display: block; }
 
+    @keyframes spin { to { transform: translateY(-50%) rotate(360deg); } }
+
+    .miles-hint { font-size: 10px; color: var(--dim); margin-top: 4px; min-height: 14px; }
+    .miles-hint.ok { color: var(--green); }
+    .miles-hint.err { color: var(--red); }
+
+    /* ── Main layout ── */
+    #main { max-width: 1120px; margin: 0 auto; padding: 28px 24px 60px; }
+
+    /* ── Cards ── */
+    #cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 22px; }
+    .card-label { color: var(--muted); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
+    .card-value { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; line-height: 1; }
+    .card-unit { color: var(--dim); font-size: 11px; margin-top: 4px; }
+
+    /* ── Form ── */
+    #form-wrap {
+      background: var(--surface); border: 1px solid var(--border2);
+      border-radius: 10px; padding: 22px; margin-bottom: 22px;
+      display: none; animation: fadeIn 0.25s ease;
+    }
     #form-wrap.open { display: block; }
 
     @keyframes fadeIn {
@@ -172,158 +240,44 @@
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    .form-title {
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: 13px;
-      margin-bottom: 16px;
-    }
-
+    .form-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; margin-bottom: 16px; }
     .form-row { display: grid; gap: 12px; margin-bottom: 12px; }
     .form-row-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
     .form-row-end { grid-template-columns: 1fr 2fr auto auto; align-items: end; }
-
-    .field-label {
-      color: var(--muted);
-      font-size: 10px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      margin-bottom: 5px;
-    }
+    .field-label { color: var(--muted); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 5px; }
 
     /* ── Toolbar ── */
-    #toolbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 14px;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
+    #toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
     #toolbar-left { color: var(--muted); font-size: 12px; }
-
-    #toolbar-right {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    #filter-month { width: 150px; }
+    #toolbar-right { display: flex; align-items: center; gap: 8px; }
 
     /* ── Table ── */
-    #table-wrap {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      overflow: hidden;
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 700px;
-    }
-
-    thead tr {
-      background: var(--bg);
-      border-bottom: 1px solid var(--border);
-    }
-
-    th {
-      padding: 10px 14px;
-      text-align: left;
-      color: var(--muted);
-      font-size: 10px;
-      letter-spacing: 0.07em;
-      text-transform: uppercase;
-      font-weight: 500;
-      white-space: nowrap;
-    }
-
-    th .sort-btn {
-      background: none;
-      border: none;
-      color: var(--muted);
-      cursor: pointer;
-      font-size: 10px;
-      margin-left: 4px;
-      padding: 0 2px;
-      transition: color 0.1s;
-    }
+    #table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 700px; }
+    thead tr { background: var(--bg); border-bottom: 1px solid var(--border); }
+    th { padding: 10px 14px; text-align: left; color: var(--muted); font-size: 10px; letter-spacing: 0.07em; text-transform: uppercase; font-weight: 500; white-space: nowrap; }
+    th .sort-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 10px; margin-left: 4px; padding: 0 2px; }
     th .sort-btn:hover { color: var(--text); }
-
-    tbody tr {
-      border-bottom: 1px solid var(--border);
-      transition: background 0.1s;
-    }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
     tbody tr:hover { background: #1c2128; }
     tbody tr:last-child { border-bottom: none; }
-
-    td {
-      padding: 11px 14px;
-      font-size: 12px;
-      vertical-align: middle;
-    }
-
+    td { padding: 11px 14px; font-size: 12px; vertical-align: middle; }
     .td-muted { color: var(--muted); }
     .td-blue  { color: var(--blue); font-weight: 500; }
     .td-green { color: var(--green); font-weight: 600; }
     .td-dim   { color: var(--dim); font-size: 11px; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
     .arrow { color: var(--dim); margin: 0 5px; }
+    tfoot tr { background: var(--bg); border-top: 2px solid var(--border); }
+    tfoot td { font-weight: 600; }
+    .empty-row td { padding: 48px; text-align: center; color: var(--dim); }
 
-    tfoot tr {
-      background: var(--bg);
-      border-top: 2px solid var(--border);
-    }
-    tfoot td {
-      font-weight: 600;
-    }
-
-    .empty-row td {
-      padding: 48px;
-      text-align: center;
-      color: var(--dim);
-    }
-
-    /* ── Chip ── */
-    .chip {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 20px;
-      font-size: 10px;
-      font-weight: 500;
-      white-space: nowrap;
-    }
+    .chip { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 500; white-space: nowrap; }
 
     /* ── Breakdown ── */
-    #breakdown {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 10px;
-      margin-top: 20px;
-    }
-
-    .breakdown-card {
-      background: var(--surface);
-      border-radius: 8px;
-      padding: 12px 14px;
-    }
-
-    .breakdown-miles {
-      font-family: 'Syne', sans-serif;
-      font-size: 18px;
-      font-weight: 700;
-      margin-top: 8px;
-    }
-
-    .breakdown-sub {
-      color: var(--muted);
-      font-size: 10px;
-      margin-top: 3px;
-    }
+    #breakdown { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 20px; }
+    .breakdown-card { background: var(--surface); border-radius: 8px; padding: 12px 14px; }
+    .breakdown-miles { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; margin-top: 8px; }
+    .breakdown-sub { color: var(--muted); font-size: 10px; margin-top: 3px; }
 
     /* ── Responsive ── */
     @media (max-width: 760px) {
@@ -336,13 +290,33 @@
       #cards { grid-template-columns: 1fr; }
       #header { padding: 14px 16px; }
       #main { padding: 18px 14px 48px; }
-      .card-value { font-size: 22px; }
       #breakdown { grid-template-columns: 1fr; }
       .form-row-end { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
+
+<!-- ── API Key Modal ── -->
+<div id="api-modal">
+  <div id="api-box">
+    <h2>🗝️ Google Maps API Key</h2>
+    <p>
+      This tracker uses Google Maps to autocomplete addresses and automatically calculate driving distances.<br><br>
+      Paste your API key below. It's saved to your browser's localStorage and never sent anywhere else.<br><br>
+      Need a key? Go to your <a href="https://console.cloud.google.com/apis/dashboard" target="_blank">Google Cloud Console</a> and enable the <strong>Maps JavaScript API</strong>, <strong>Places API</strong>, and <strong>Distance Matrix API</strong>.
+    </p>
+    <input type="text" id="api-key-input" placeholder="AIzaSy..." autocomplete="off" spellcheck="false" />
+    <div id="api-error"></div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-primary" id="api-save-btn">Save &amp; Continue</button>
+    </div>
+    <div class="modal-note">
+      <strong>Required APIs:</strong> Maps JavaScript API &middot; Places API &middot; Distance Matrix API<br>
+      Your key is stored in <code>localStorage</code> on this device only. Click the "Maps connected" badge in the header to update it anytime.
+    </div>
+  </div>
+</div>
 
 <!-- ── Header ── -->
 <div id="header">
@@ -351,6 +325,10 @@
     <div class="sub" id="header-sub">City Networks · 2026 reimbursement log</div>
   </div>
   <div id="header-right">
+    <div id="key-badge" title="Update API key">
+      <span class="dot"></span>
+      <span>Maps connected</span>
+    </div>
     <span style="color:var(--muted);font-size:12px;">$/mi</span>
     <input type="number" class="inp rate-inp" id="rate-input" value="0.67" step="0.01" min="0" />
     <button class="btn btn-ghost" id="export-btn">↓ Export CSV</button>
@@ -361,7 +339,6 @@
 <!-- ── Main ── -->
 <div id="main">
 
-  <!-- Summary cards -->
   <div id="cards">
     <div class="card">
       <div class="card-label">Total Miles</div>
@@ -380,7 +357,7 @@
     </div>
   </div>
 
-  <!-- Add/Edit form -->
+  <!-- Form -->
   <div id="form-wrap">
     <div class="form-title" id="form-title">➕ New Trip</div>
     <div class="form-row form-row-4">
@@ -390,15 +367,19 @@
       </div>
       <div>
         <div class="field-label">From</div>
-        <input type="text" class="inp" id="f-from" placeholder="Origin" />
+        <input type="text" class="inp" id="f-from" placeholder="Start typing an address..." autocomplete="off" />
       </div>
       <div>
         <div class="field-label">To</div>
-        <input type="text" class="inp" id="f-to" placeholder="Destination" />
+        <input type="text" class="inp" id="f-to" placeholder="Start typing an address..." autocomplete="off" />
       </div>
       <div>
-        <div class="field-label">Miles</div>
-        <input type="number" class="inp" id="f-miles" placeholder="0.0" step="0.1" min="0" />
+        <div class="field-label">Miles <span style="color:var(--dim);font-size:9px;letter-spacing:0;">(auto)</span></div>
+        <div class="miles-wrap" id="miles-wrap">
+          <input type="number" class="inp" id="f-miles" placeholder="Auto-calculated" step="0.1" min="0" />
+          <div class="spin-ring"></div>
+        </div>
+        <div class="miles-hint" id="miles-hint">Select both addresses to auto-fill</div>
       </div>
     </div>
     <div class="form-row form-row-end">
@@ -414,7 +395,7 @@
       </div>
       <div>
         <div class="field-label">Notes</div>
-        <input type="text" class="inp" id="f-notes" placeholder="Optional notes..." />
+        <input type="text" class="inp" id="f-notes" placeholder="Venue, account, context..." />
       </div>
       <button class="btn btn-primary" id="submit-btn" style="height:36px;">Add</button>
       <button class="btn btn-ghost" id="cancel-btn" style="height:36px;">Cancel</button>
@@ -450,13 +431,11 @@
     </table>
   </div>
 
-  <!-- Breakdown -->
   <div id="breakdown"></div>
-
 </div>
 
 <script>
-// ── Data ──
+// ── Constants ──
 const PURPOSE_COLORS = {
   "Client Meeting": "#3b82f6",
   "Site Visit":     "#10b981",
@@ -464,43 +443,161 @@ const PURPOSE_COLORS = {
   "Training":       "#f59e0b",
   "Other":          "#6b7280",
 };
-const PURPOSES = Object.keys(PURPOSE_COLORS);
+const PURPOSES    = Object.keys(PURPOSE_COLORS);
 const STORAGE_KEY = "cn_mileage_v1";
+const API_KEY_KEY = "cn_gmaps_key";
 
-let trips = [];
-let rate = 0.67;
-let editId = null;
-let filterMonth = "";
-let sortKey = "date";
-let sortDir = "desc";
+// ── State ──
+let trips        = [];
+let rate         = 0.67;
+let editId       = null;
+let filterMonth  = "";
+let sortKey      = "date";
+let sortDir      = "desc";
+let gmapsReady   = false;
+let fromSelected = false;
+let toSelected   = false;
+
+// ── Utils ──
+const $       = id => document.getElementById(id);
+const fmt$    = n  => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
+const fmtDate = d  => new Date(d + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+const todayStr = () => new Date().toISOString().split("T")[0];
+const uid      = () => Date.now() + Math.random();
+const escHtml  = s  => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 
 // ── Persistence ──
 function save() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ trips, rate })); } catch(e) {}
 }
-
 function load() {
   try {
     const d = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-    if (d.trips) trips = d.trips;
-    if (d.rate)  rate  = d.rate;
+    if (Array.isArray(d.trips)) trips = d.trips;
+    if (d.rate) rate = +d.rate;
   } catch(e) {}
-  // Seed if empty
-  if (trips.length === 0) {
+  if (!trips.length) {
     trips = [
-      { id: 1, date: "2026-04-01", from: "Hollywood, CA", to: "Downtown LA", miles: 14.2, purpose: "Client Meeting", notes: "Hyatt venue walkthrough" },
-      { id: 2, date: "2026-04-03", from: "LAX", to: "Santa Monica", miles: 18.5, purpose: "Site Visit", notes: "Buffalo Wild Wings install check" },
+      { id: 1, date: "2026-04-01", from: "Hollywood, CA", to: "Downtown Los Angeles, CA", miles: 14.2, purpose: "Client Meeting", notes: "Hyatt venue walkthrough" },
+      { id: 2, date: "2026-04-03", from: "LAX, Los Angeles, CA", to: "Santa Monica, CA", miles: 18.5, purpose: "Site Visit", notes: "Buffalo Wild Wings install check" },
     ];
   }
 }
 
-// ── Helpers ──
-const $ = id => document.getElementById(id);
-const fmt$ = n => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
-const fmtDate = d => new Date(d + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-const todayStr = () => new Date().toISOString().split("T")[0];
-const uid = () => Date.now() + Math.random();
+// ── API Key ──
+const getSavedKey = () => localStorage.getItem(API_KEY_KEY) || "";
+const saveKey     = k  => localStorage.setItem(API_KEY_KEY, k);
 
+function showModal(msg) {
+  $("api-modal").classList.remove("hidden");
+  $("api-key-input").value = getSavedKey();
+  const err = $("api-error");
+  if (msg) { err.textContent = msg; err.style.display = "block"; }
+  else err.style.display = "none";
+  setTimeout(() => $("api-key-input").focus(), 100);
+}
+const hideModal = () => $("api-modal").classList.add("hidden");
+
+function tryLoadKey() {
+  const key = $("api-key-input").value.trim();
+  const err = $("api-error");
+  if (!key || !key.startsWith("AIza")) {
+    err.textContent = 'Key should start with "AIza". Check your Google Cloud Console.';
+    err.style.display = "block";
+    return;
+  }
+  saveKey(key);
+  err.style.display = "none";
+  hideModal();
+  loadGoogleMaps(key);
+}
+
+$("api-save-btn").addEventListener("click", tryLoadKey);
+$("api-key-input").addEventListener("keydown", e => { if (e.key === "Enter") tryLoadKey(); });
+$("key-badge").addEventListener("click", () => showModal());
+
+// ── Google Maps ──
+function loadGoogleMaps(key) {
+  // Remove any old script
+  const old = document.querySelector("script[data-gmaps]");
+  if (old) old.remove();
+  const s = document.createElement("script");
+  s.dataset.gmaps = "1";
+  s.async = true;
+  s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&libraries=places&callback=_gmapsLoaded`;
+  s.onerror = () => showModal("Failed to load Google Maps. Check that your key is valid and the APIs are enabled in Google Cloud Console.");
+  document.head.appendChild(s);
+}
+
+window._gmapsLoaded = function() {
+  gmapsReady = true;
+  bindAutocomplete();
+};
+
+function bindAutocomplete() {
+  const opts = { types: ["geocode", "establishment"] };
+  const acFrom = new google.maps.places.Autocomplete($("f-from"), opts);
+  const acTo   = new google.maps.places.Autocomplete($("f-to"),   opts);
+
+  acFrom.addListener("place_changed", () => { fromSelected = true;  maybeCalcDistance(); });
+  acTo.addListener("place_changed",   () => { toSelected   = true;  maybeCalcDistance(); });
+
+  // Reset flags when user edits manually
+  $("f-from").addEventListener("input", () => { fromSelected = false; resetMiles(); });
+  $("f-to").addEventListener("input",   () => { toSelected   = false; resetMiles(); });
+}
+
+function setMilesHint(text, cls) {
+  const h = $("miles-hint");
+  h.textContent = text;
+  h.className = "miles-hint" + (cls ? " " + cls : "");
+}
+
+function resetMiles() {
+  const inp = $("f-miles");
+  inp.readOnly = false;
+  inp.classList.remove("miles-auto", "miles-calculating");
+  $("miles-wrap").classList.remove("loading");
+  setMilesHint("Select both addresses to auto-fill");
+}
+
+function maybeCalcDistance() {
+  if (!fromSelected || !toSelected) return;
+  const origin = $("f-from").value.trim();
+  const dest   = $("f-to").value.trim();
+  if (!origin || !dest) return;
+
+  // Loading state
+  const inp = $("f-miles");
+  inp.value = "";
+  inp.readOnly = true;
+  inp.classList.remove("miles-auto");
+  inp.classList.add("miles-calculating");
+  $("miles-wrap").classList.add("loading");
+  setMilesHint("Calculating driving distance...");
+
+  new google.maps.DistanceMatrixService().getDistanceMatrix(
+    { origins: [origin], destinations: [dest], travelMode: google.maps.TravelMode.DRIVING, unitSystem: google.maps.UnitSystem.IMPERIAL },
+    (res, status) => {
+      $("miles-wrap").classList.remove("loading");
+      inp.readOnly = false;
+      inp.classList.remove("miles-calculating");
+
+      if (status === "OK" && res.rows[0].elements[0].status === "OK") {
+        const el    = res.rows[0].elements[0];
+        const miles = Math.round(el.distance.value / 1609.344 * 10) / 10;
+        inp.value   = miles;
+        inp.classList.add("miles-auto");
+        setMilesHint(`✓ ${el.duration.text} drive · ${el.distance.text}`, "ok");
+      } else {
+        setMilesHint("Could not calculate distance — enter miles manually.", "err");
+        inp.value = "";
+      }
+    }
+  );
+}
+
+// ── Render ──
 function getFiltered() {
   let t = trips.filter(r => filterMonth ? r.date.startsWith(filterMonth) : true);
   t.sort((a, b) => {
@@ -513,101 +610,77 @@ function getFiltered() {
   return t;
 }
 
-// ── Render ──
 function render() {
-  const filtered = getFiltered();
-  const totalMiles = filtered.reduce((s, r) => s + +r.miles, 0);
+  const f          = getFiltered();
+  const totalMiles = f.reduce((s, r) => s + +r.miles, 0);
   const totalReimb = totalMiles * rate;
 
-  // Cards
-  $("stat-miles").textContent  = totalMiles.toFixed(1);
-  $("stat-reimb").textContent  = fmt$(totalReimb);
-  $("stat-trips").textContent  = filtered.length;
+  $("stat-miles").textContent      = totalMiles.toFixed(1);
+  $("stat-reimb").textContent      = fmt$(totalReimb);
+  $("stat-trips").textContent      = f.length;
   $("stat-reimb-unit").textContent = filterMonth ? "this month" : "all time";
+  $("header-sub").textContent      = `City Networks · $${rate}/mi · ${new Date().getFullYear()} reimbursement log`;
+  $("clear-filter-btn").style.display = filterMonth ? "inline-block" : "none";
+  $("toolbar-left").textContent    = `${f.length} trip${f.length !== 1 ? "s" : ""} · ${totalMiles.toFixed(1)} mi · ${fmt$(totalReimb)}`;
 
-  // Header sub
-  $("header-sub").textContent = `City Networks · IRS Rate $${rate}/mi · ${new Date().getFullYear()} reimbursement log`;
-
-  // Sort buttons
   document.querySelectorAll(".sort-btn").forEach(btn => {
     const k = btn.dataset.key;
     btn.textContent = sortKey === k ? (sortDir === "asc" ? "↑" : "↓") : "↕";
   });
 
-  // Toolbar
-  $("toolbar-left").textContent = `${filtered.length} trip${filtered.length !== 1 ? "s" : ""} · ${totalMiles.toFixed(1)} mi · ${fmt$(totalReimb)}`;
-  $("clear-filter-btn").style.display = filterMonth ? "inline-block" : "none";
-
-  // Table body
+  // Body
   const tbody = $("tbody");
   tbody.innerHTML = "";
-
-  if (filtered.length === 0) {
-    const tr = document.createElement("tr");
-    tr.className = "empty-row";
-    tr.innerHTML = `<td colspan="7">No trips logged yet. Add your first trip above.</td>`;
-    tbody.appendChild(tr);
+  if (!f.length) {
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="7">No trips yet. Add your first trip above.</td></tr>`;
   } else {
-    filtered.forEach((trip, i) => {
-      const color = PURPOSE_COLORS[trip.purpose] || "#6b7280";
+    f.forEach(trip => {
+      const c  = PURPOSE_COLORS[trip.purpose] || "#6b7280";
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td class="td-muted">${fmtDate(trip.date)}</td>
         <td>${escHtml(trip.from)}<span class="arrow">→</span>${escHtml(trip.to)}</td>
         <td class="td-blue">${(+trip.miles).toFixed(1)}</td>
-        <td><span class="chip" style="background:${color}22;color:${color}">${escHtml(trip.purpose)}</span></td>
-        <td class="td-dim" title="${escHtml(trip.notes || '')}">${escHtml(trip.notes || "—")}</td>
+        <td><span class="chip" style="background:${c}22;color:${c}">${escHtml(trip.purpose)}</span></td>
+        <td class="td-dim" title="${escHtml(trip.notes||"")}">${escHtml(trip.notes||"—")}</td>
         <td class="td-green">${fmt$(+trip.miles * rate)}</td>
-        <td>
-          <div style="display:flex;gap:6px;">
-            <button class="btn btn-edit" onclick="startEdit(${trip.id})">Edit</button>
-            <button class="btn btn-danger" onclick="deleteTrip(${trip.id})">✕</button>
-          </div>
-        </td>
-      `;
+        <td><div style="display:flex;gap:6px;">
+          <button class="btn btn-edit" onclick="startEdit(${trip.id})">Edit</button>
+          <button class="btn btn-danger" onclick="deleteTrip(${trip.id})">✕</button>
+        </div></td>`;
       tbody.appendChild(tr);
     });
   }
 
   // Footer
-  const tfoot = $("tfoot");
-  tfoot.innerHTML = "";
-  if (filtered.length > 0) {
-    tfoot.innerHTML = `
-      <tr>
-        <td colspan="2" class="td-muted" style="font-size:11px;">TOTAL · ${filtered.length} trips</td>
-        <td class="td-blue" style="font-size:14px;">${totalMiles.toFixed(1)}</td>
-        <td colspan="2"></td>
-        <td class="td-green" style="font-size:15px;">${fmt$(totalReimb)}</td>
-        <td></td>
-      </tr>
-    `;
-  }
+  $("tfoot").innerHTML = f.length ? `
+    <tr>
+      <td colspan="2" class="td-muted" style="font-size:11px;">TOTAL · ${f.length} trips</td>
+      <td class="td-blue" style="font-size:14px;">${totalMiles.toFixed(1)}</td>
+      <td colspan="2"></td>
+      <td class="td-green" style="font-size:15px;">${fmt$(totalReimb)}</td>
+      <td></td>
+    </tr>` : "";
 
   // Breakdown
   const bd = $("breakdown");
   bd.innerHTML = "";
-  if (filtered.length > 0) {
+  if (f.length) {
     PURPOSES.forEach(p => {
-      const pTrips = filtered.filter(t => t.purpose === p);
-      const pMiles = pTrips.reduce((s, t) => s + +t.miles, 0);
-      if (pTrips.length === 0) return;
-      const color = PURPOSE_COLORS[p];
+      const pt = f.filter(t => t.purpose === p);
+      if (!pt.length) return;
+      const pm  = pt.reduce((s, t) => s + +t.miles, 0);
+      const c   = PURPOSE_COLORS[p];
       const div = document.createElement("div");
       div.className = "breakdown-card";
-      div.style.border = `1px solid ${color}33`;
+      div.style.border = `1px solid ${c}33`;
       div.innerHTML = `
-        <span class="chip" style="background:${color}22;color:${color}">${p}</span>
-        <div class="breakdown-miles">${pMiles.toFixed(1)} mi</div>
-        <div class="breakdown-sub">${fmt$(pMiles * rate)} · ${pTrips.length} trip${pTrips.length !== 1 ? "s" : ""}</div>
-      `;
+        <span class="chip" style="background:${c}22;color:${c}">${p}</span>
+        <div class="breakdown-miles">${pm.toFixed(1)} mi</div>
+        <div class="breakdown-sub">${fmt$(pm * rate)} · ${pt.length} trip${pt.length !== 1 ? "s" : ""}</div>`;
       bd.appendChild(div);
     });
   }
-}
-
-function escHtml(s) {
-  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
 
 // ── Form ──
@@ -615,54 +688,51 @@ function openForm(isEdit) {
   $("form-wrap").classList.add("open");
   $("form-title").textContent = isEdit ? "✏️ Edit Trip" : "➕ New Trip";
   $("submit-btn").textContent = isEdit ? "Save" : "Add";
-  $("add-btn").textContent = "− Close";
+  $("add-btn").textContent    = "− Close";
 }
 
 function closeForm() {
   $("form-wrap").classList.remove("open");
   $("add-btn").textContent = "+ Add Trip";
   editId = null;
-  resetForm();
+  resetFormFields();
 }
 
-function resetForm() {
+function resetFormFields() {
   $("f-date").value    = todayStr();
   $("f-from").value    = "";
   $("f-to").value      = "";
   $("f-miles").value   = "";
   $("f-purpose").value = "Client Meeting";
   $("f-notes").value   = "";
+  fromSelected = false;
+  toSelected   = false;
+  resetMiles();
 }
 
 function submitForm() {
-  const date    = $("f-date").value.trim();
-  const from    = $("f-from").value.trim();
-  const to      = $("f-to").value.trim();
-  const miles   = parseFloat($("f-miles").value);
-  const purpose = $("f-purpose").value;
-  const notes   = $("f-notes").value.trim();
+  const date  = $("f-date").value.trim();
+  const from  = $("f-from").value.trim();
+  const to    = $("f-to").value.trim();
+  const miles = parseFloat($("f-miles").value);
+  const valid = date && from && to && !isNaN(miles) && miles > 0;
 
-  if (!date || !from || !to || isNaN(miles) || miles <= 0) {
-    $("f-date").style.borderColor  = date    ? "" : "var(--red)";
-    $("f-from").style.borderColor  = from    ? "" : "var(--red)";
-    $("f-to").style.borderColor    = to      ? "" : "var(--red)";
-    $("f-miles").style.borderColor = (!isNaN(miles) && miles > 0) ? "" : "var(--red)";
-    return;
-  }
+  $("f-date").style.borderColor  = date  ? "" : "var(--red)";
+  $("f-from").style.borderColor  = from  ? "" : "var(--red)";
+  $("f-to").style.borderColor    = to    ? "" : "var(--red)";
+  $("f-miles").style.borderColor = (!isNaN(miles) && miles > 0) ? "" : "var(--red)";
 
-  // reset borders
+  if (!valid) return;
   ["f-date","f-from","f-to","f-miles"].forEach(id => $(id).style.borderColor = "");
 
+  const entry = { date, from, to, miles, purpose: $("f-purpose").value, notes: $("f-notes").value.trim() };
   if (editId !== null) {
-    trips = trips.map(t => t.id === editId ? { id: editId, date, from, to, miles, purpose, notes } : t);
+    trips = trips.map(t => t.id === editId ? { ...entry, id: editId } : t);
     editId = null;
   } else {
-    trips.push({ id: uid(), date, from, to, miles, purpose, notes });
+    trips.push({ ...entry, id: uid() });
   }
-
-  save();
-  closeForm();
-  render();
+  save(); closeForm(); render();
 }
 
 function startEdit(id) {
@@ -674,63 +744,50 @@ function startEdit(id) {
   $("f-to").value      = trip.to;
   $("f-miles").value   = trip.miles;
   $("f-purpose").value = trip.purpose;
-  $("f-notes").value   = trip.notes;
+  $("f-notes").value   = trip.notes || "";
+  fromSelected = false; toSelected = false;
+  resetMiles();
+  setMilesHint("Re-select addresses to recalculate, or edit miles directly");
   openForm(true);
-  $("f-date").focus();
+  $("f-from").focus();
 }
 
 function deleteTrip(id) {
   if (!confirm("Delete this trip?")) return;
   trips = trips.filter(t => t.id !== id);
-  save();
-  render();
+  save(); render();
 }
 
 // ── Export ──
-function exportCSV() {
-  const filtered = getFiltered();
-  const header = "Date,From,To,Miles,Purpose,Notes,Reimbursement\n";
-  const rows = filtered.map(r =>
-    `${r.date},"${r.from}","${r.to}",${r.miles},"${r.purpose}","${r.notes}",${(+r.miles * rate).toFixed(2)}`
-  ).join("\n");
-  const blob = new Blob([header + rows], { type: "text/csv" });
+$("export-btn").addEventListener("click", () => {
+  const f    = getFiltered();
+  const blob = new Blob(
+    ["Date,From,To,Miles,Purpose,Notes,Reimbursement\n" +
+     f.map(r => `${r.date},"${r.from}","${r.to}",${r.miles},"${r.purpose}","${r.notes||""}",${(+r.miles*rate).toFixed(2)}`).join("\n")],
+    { type: "text/csv" }
+  );
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = `mileage-${filterMonth || new Date().getFullYear()}.csv`;
+  a.download = `mileage-${filterMonth||new Date().getFullYear()}.csv`;
   a.click();
-}
+});
 
 // ── Events ──
 $("add-btn").addEventListener("click", () => {
-  if ($("form-wrap").classList.contains("open") && editId === null) {
-    closeForm();
-  } else if (!$("form-wrap").classList.contains("open")) {
-    resetForm();
-    openForm(false);
-    $("f-date").focus();
-  }
+  if ($("form-wrap").classList.contains("open") && !editId) closeForm();
+  else if (!$("form-wrap").classList.contains("open")) { resetFormFields(); openForm(false); $("f-from").focus(); }
 });
 
 $("cancel-btn").addEventListener("click", closeForm);
 $("submit-btn").addEventListener("click", submitForm);
-
-$("export-btn").addEventListener("click", exportCSV);
 
 $("rate-input").addEventListener("input", e => {
   const v = parseFloat(e.target.value);
   if (!isNaN(v) && v > 0) { rate = v; save(); render(); }
 });
 
-$("filter-month").addEventListener("change", e => {
-  filterMonth = e.target.value;
-  render();
-});
-
-$("clear-filter-btn").addEventListener("click", () => {
-  filterMonth = "";
-  $("filter-month").value = "";
-  render();
-});
+$("filter-month").addEventListener("change", e => { filterMonth = e.target.value; render(); });
+$("clear-filter-btn").addEventListener("click", () => { filterMonth = ""; $("filter-month").value = ""; render(); });
 
 document.querySelectorAll(".sort-btn").forEach(btn => {
   btn.addEventListener("click", () => {
@@ -741,16 +798,17 @@ document.querySelectorAll(".sort-btn").forEach(btn => {
   });
 });
 
-// Enter key in form
-["f-date","f-from","f-to","f-miles","f-purpose","f-notes"].forEach(id => {
-  $(id).addEventListener("keydown", e => { if (e.key === "Enter") submitForm(); });
-});
+["f-notes","f-purpose"].forEach(id => $(id).addEventListener("keydown", e => { if (e.key === "Enter") submitForm(); }));
 
 // ── Init ──
 load();
 $("rate-input").value = rate;
-$("f-date").value = todayStr();
+$("f-date").value     = todayStr();
 render();
+
+const key = getSavedKey();
+if (key && key.startsWith("AIza")) { hideModal(); loadGoogleMaps(key); }
+else showModal();
 </script>
 </body>
 </html>
