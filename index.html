@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mileage Tracker · City Networks</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@600;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #21262d;
+      --border2: #30363d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --dim: #484f58;
+      --blue: #58a6ff;
+      --green: #3fb950;
+      --red: #f85149;
+      --purple: #d2a8ff;
+      --yellow: #f59e0b;
+      --accent-green: #238636;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Mono', 'Courier New', monospace;
+      font-size: 13px;
+      min-height: 100vh;
+    }
+
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+    /* ── Header ── */
+    #header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    #header h1 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 20px;
+      letter-spacing: -0.3px;
+      color: #fff;
+    }
+
+    #header .sub {
+      color: var(--muted);
+      font-size: 11px;
+      margin-top: 2px;
+    }
+
+    #header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      cursor: pointer;
+      border: none;
+      border-radius: 6px;
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      padding: 7px 14px;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .btn:hover { opacity: 0.82; transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .btn-primary { background: var(--accent-green); color: #fff; font-weight: 600; font-size: 13px; padding: 8px 16px; }
+    .btn-ghost { background: var(--surface); color: var(--muted); border: 1px solid var(--border2); }
+    .btn-danger { background: transparent; color: var(--red); border: 1px solid var(--border2); padding: 4px 10px; font-size: 11px; }
+    .btn-edit { background: #21262d; color: var(--muted); border: 1px solid var(--border2); padding: 4px 10px; font-size: 11px; }
+
+    /* ── Form inputs ── */
+    .inp {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      width: 100%;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .inp:focus { border-color: var(--blue); }
+    .inp option { background: #161b22; }
+
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+    .rate-inp { width: 72px; text-align: center; }
+
+    /* ── Main layout ── */
+    #main {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 28px 24px 60px;
+    }
+
+    /* ── Summary cards ── */
+    #cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 22px;
+    }
+
+    .card-label {
+      color: var(--muted);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .card-value {
+      font-family: 'Syne', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .card-unit {
+      color: var(--dim);
+      font-size: 11px;
+      margin-top: 4px;
+    }
+
+    /* ── Add form ── */
+    #form-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      padding: 22px;
+      margin-bottom: 22px;
+      display: none;
+      animation: fadeIn 0.25s ease;
+    }
+
+    #form-wrap.open { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+
+    .form-row { display: grid; gap: 12px; margin-bottom: 12px; }
+    .form-row-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+    .form-row-end { grid-template-columns: 1fr 2fr auto auto; align-items: end; }
+
+    .field-label {
+      color: var(--muted);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+
+    /* ── Toolbar ── */
+    #toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    #toolbar-left { color: var(--muted); font-size: 12px; }
+
+    #toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #filter-month { width: 150px; }
+
+    /* ── Table ── */
+    #table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 700px;
+    }
+
+    thead tr {
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      padding: 10px 14px;
+      text-align: left;
+      color: var(--muted);
+      font-size: 10px;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    th .sort-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 10px;
+      margin-left: 4px;
+      padding: 0 2px;
+      transition: color 0.1s;
+    }
+    th .sort-btn:hover { color: var(--text); }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.1s;
+    }
+    tbody tr:hover { background: #1c2128; }
+    tbody tr:last-child { border-bottom: none; }
+
+    td {
+      padding: 11px 14px;
+      font-size: 12px;
+      vertical-align: middle;
+    }
+
+    .td-muted { color: var(--muted); }
+    .td-blue  { color: var(--blue); font-weight: 500; }
+    .td-green { color: var(--green); font-weight: 600; }
+    .td-dim   { color: var(--dim); font-size: 11px; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .arrow { color: var(--dim); margin: 0 5px; }
+
+    tfoot tr {
+      background: var(--bg);
+      border-top: 2px solid var(--border);
+    }
+    tfoot td {
+      font-weight: 600;
+    }
+
+    .empty-row td {
+      padding: 48px;
+      text-align: center;
+      color: var(--dim);
+    }
+
+    /* ── Chip ── */
+    .chip {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    /* ── Breakdown ── */
+    #breakdown {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .breakdown-card {
+      background: var(--surface);
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+
+    .breakdown-miles {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      margin-top: 8px;
+    }
+
+    .breakdown-sub {
+      color: var(--muted);
+      font-size: 10px;
+      margin-top: 3px;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 760px) {
+      #cards { grid-template-columns: 1fr 1fr; }
+      .form-row-4 { grid-template-columns: 1fr 1fr; }
+      .form-row-end { grid-template-columns: 1fr 1fr; }
+      #breakdown { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 480px) {
+      #cards { grid-template-columns: 1fr; }
+      #header { padding: 14px 16px; }
+      #main { padding: 18px 14px 48px; }
+      .card-value { font-size: 22px; }
+      #breakdown { grid-template-columns: 1fr; }
+      .form-row-end { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<div id="header">
+  <div>
+    <h1>⛽ Mileage Tracker</h1>
+    <div class="sub" id="header-sub">City Networks · 2026 reimbursement log</div>
+  </div>
+  <div id="header-right">
+    <span style="color:var(--muted);font-size:12px;">$/mi</span>
+    <input type="number" class="inp rate-inp" id="rate-input" value="0.67" step="0.01" min="0" />
+    <button class="btn btn-ghost" id="export-btn">↓ Export CSV</button>
+    <button class="btn btn-primary" id="add-btn">+ Add Trip</button>
+  </div>
+</div>
+
+<!-- ── Main ── -->
+<div id="main">
+
+  <!-- Summary cards -->
+  <div id="cards">
+    <div class="card">
+      <div class="card-label">Total Miles</div>
+      <div class="card-value" id="stat-miles" style="color:var(--blue)">0.0</div>
+      <div class="card-unit">mi</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Reimbursement</div>
+      <div class="card-value" id="stat-reimb" style="color:var(--green)">$0.00</div>
+      <div class="card-unit" id="stat-reimb-unit">all time</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Trips Logged</div>
+      <div class="card-value" id="stat-trips" style="color:var(--purple)">0</div>
+      <div class="card-unit">entries</div>
+    </div>
+  </div>
+
+  <!-- Add/Edit form -->
+  <div id="form-wrap">
+    <div class="form-title" id="form-title">➕ New Trip</div>
+    <div class="form-row form-row-4">
+      <div>
+        <div class="field-label">Date</div>
+        <input type="date" class="inp" id="f-date" />
+      </div>
+      <div>
+        <div class="field-label">From</div>
+        <input type="text" class="inp" id="f-from" placeholder="Origin" />
+      </div>
+      <div>
+        <div class="field-label">To</div>
+        <input type="text" class="inp" id="f-to" placeholder="Destination" />
+      </div>
+      <div>
+        <div class="field-label">Miles</div>
+        <input type="number" class="inp" id="f-miles" placeholder="0.0" step="0.1" min="0" />
+      </div>
+    </div>
+    <div class="form-row form-row-end">
+      <div>
+        <div class="field-label">Purpose</div>
+        <select class="inp" id="f-purpose">
+          <option>Client Meeting</option>
+          <option>Site Visit</option>
+          <option>Conference</option>
+          <option>Training</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div>
+        <div class="field-label">Notes</div>
+        <input type="text" class="inp" id="f-notes" placeholder="Optional notes..." />
+      </div>
+      <button class="btn btn-primary" id="submit-btn" style="height:36px;">Add</button>
+      <button class="btn btn-ghost" id="cancel-btn" style="height:36px;">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div id="toolbar">
+    <div id="toolbar-left"></div>
+    <div id="toolbar-right">
+      <span style="color:var(--muted);font-size:12px;">Filter month:</span>
+      <input type="month" class="inp" id="filter-month" style="width:150px;" />
+      <button class="btn btn-ghost" id="clear-filter-btn" style="display:none;padding:6px 10px;font-size:11px;">Clear</button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div id="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Date <button class="sort-btn" data-key="date">↕</button></th>
+          <th>From → To</th>
+          <th>Miles <button class="sort-btn" data-key="miles">↕</button></th>
+          <th>Purpose</th>
+          <th>Notes</th>
+          <th>Amount</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+      <tfoot id="tfoot"></tfoot>
+    </table>
+  </div>
+
+  <!-- Breakdown -->
+  <div id="breakdown"></div>
+
+</div>
+
+<script>
+// ── Data ──
+const PURPOSE_COLORS = {
+  "Client Meeting": "#3b82f6",
+  "Site Visit":     "#10b981",
+  "Conference":     "#8b5cf6",
+  "Training":       "#f59e0b",
+  "Other":          "#6b7280",
+};
+const PURPOSES = Object.keys(PURPOSE_COLORS);
+const STORAGE_KEY = "cn_mileage_v1";
+
+let trips = [];
+let rate = 0.67;
+let editId = null;
+let filterMonth = "";
+let sortKey = "date";
+let sortDir = "desc";
+
+// ── Persistence ──
+function save() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ trips, rate })); } catch(e) {}
+}
+
+function load() {
+  try {
+    const d = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+    if (d.trips) trips = d.trips;
+    if (d.rate)  rate  = d.rate;
+  } catch(e) {}
+  // Seed if empty
+  if (trips.length === 0) {
+    trips = [
+      { id: 1, date: "2026-04-01", from: "Hollywood, CA", to: "Downtown LA", miles: 14.2, purpose: "Client Meeting", notes: "Hyatt venue walkthrough" },
+      { id: 2, date: "2026-04-03", from: "LAX", to: "Santa Monica", miles: 18.5, purpose: "Site Visit", notes: "Buffalo Wild Wings install check" },
+    ];
+  }
+}
+
+// ── Helpers ──
+const $ = id => document.getElementById(id);
+const fmt$ = n => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
+const fmtDate = d => new Date(d + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+const todayStr = () => new Date().toISOString().split("T")[0];
+const uid = () => Date.now() + Math.random();
+
+function getFiltered() {
+  let t = trips.filter(r => filterMonth ? r.date.startsWith(filterMonth) : true);
+  t.sort((a, b) => {
+    let av = a[sortKey], bv = b[sortKey];
+    if (sortKey === "miles") { av = +av; bv = +bv; }
+    if (av < bv) return sortDir === "asc" ? -1 : 1;
+    if (av > bv) return sortDir === "asc" ? 1 : -1;
+    return 0;
+  });
+  return t;
+}
+
+// ── Render ──
+function render() {
+  const filtered = getFiltered();
+  const totalMiles = filtered.reduce((s, r) => s + +r.miles, 0);
+  const totalReimb = totalMiles * rate;
+
+  // Cards
+  $("stat-miles").textContent  = totalMiles.toFixed(1);
+  $("stat-reimb").textContent  = fmt$(totalReimb);
+  $("stat-trips").textContent  = filtered.length;
+  $("stat-reimb-unit").textContent = filterMonth ? "this month" : "all time";
+
+  // Header sub
+  $("header-sub").textContent = `City Networks · IRS Rate $${rate}/mi · ${new Date().getFullYear()} reimbursement log`;
+
+  // Sort buttons
+  document.querySelectorAll(".sort-btn").forEach(btn => {
+    const k = btn.dataset.key;
+    btn.textContent = sortKey === k ? (sortDir === "asc" ? "↑" : "↓") : "↕";
+  });
+
+  // Toolbar
+  $("toolbar-left").textContent = `${filtered.length} trip${filtered.length !== 1 ? "s" : ""} · ${totalMiles.toFixed(1)} mi · ${fmt$(totalReimb)}`;
+  $("clear-filter-btn").style.display = filterMonth ? "inline-block" : "none";
+
+  // Table body
+  const tbody = $("tbody");
+  tbody.innerHTML = "";
+
+  if (filtered.length === 0) {
+    const tr = document.createElement("tr");
+    tr.className = "empty-row";
+    tr.innerHTML = `<td colspan="7">No trips logged yet. Add your first trip above.</td>`;
+    tbody.appendChild(tr);
+  } else {
+    filtered.forEach((trip, i) => {
+      const color = PURPOSE_COLORS[trip.purpose] || "#6b7280";
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td class="td-muted">${fmtDate(trip.date)}</td>
+        <td>${escHtml(trip.from)}<span class="arrow">→</span>${escHtml(trip.to)}</td>
+        <td class="td-blue">${(+trip.miles).toFixed(1)}</td>
+        <td><span class="chip" style="background:${color}22;color:${color}">${escHtml(trip.purpose)}</span></td>
+        <td class="td-dim" title="${escHtml(trip.notes || '')}">${escHtml(trip.notes || "—")}</td>
+        <td class="td-green">${fmt$(+trip.miles * rate)}</td>
+        <td>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-edit" onclick="startEdit(${trip.id})">Edit</button>
+            <button class="btn btn-danger" onclick="deleteTrip(${trip.id})">✕</button>
+          </div>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Footer
+  const tfoot = $("tfoot");
+  tfoot.innerHTML = "";
+  if (filtered.length > 0) {
+    tfoot.innerHTML = `
+      <tr>
+        <td colspan="2" class="td-muted" style="font-size:11px;">TOTAL · ${filtered.length} trips</td>
+        <td class="td-blue" style="font-size:14px;">${totalMiles.toFixed(1)}</td>
+        <td colspan="2"></td>
+        <td class="td-green" style="font-size:15px;">${fmt$(totalReimb)}</td>
+        <td></td>
+      </tr>
+    `;
+  }
+
+  // Breakdown
+  const bd = $("breakdown");
+  bd.innerHTML = "";
+  if (filtered.length > 0) {
+    PURPOSES.forEach(p => {
+      const pTrips = filtered.filter(t => t.purpose === p);
+      const pMiles = pTrips.reduce((s, t) => s + +t.miles, 0);
+      if (pTrips.length === 0) return;
+      const color = PURPOSE_COLORS[p];
+      const div = document.createElement("div");
+      div.className = "breakdown-card";
+      div.style.border = `1px solid ${color}33`;
+      div.innerHTML = `
+        <span class="chip" style="background:${color}22;color:${color}">${p}</span>
+        <div class="breakdown-miles">${pMiles.toFixed(1)} mi</div>
+        <div class="breakdown-sub">${fmt$(pMiles * rate)} · ${pTrips.length} trip${pTrips.length !== 1 ? "s" : ""}</div>
+      `;
+      bd.appendChild(div);
+    });
+  }
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+// ── Form ──
+function openForm(isEdit) {
+  $("form-wrap").classList.add("open");
+  $("form-title").textContent = isEdit ? "✏️ Edit Trip" : "➕ New Trip";
+  $("submit-btn").textContent = isEdit ? "Save" : "Add";
+  $("add-btn").textContent = "− Close";
+}
+
+function closeForm() {
+  $("form-wrap").classList.remove("open");
+  $("add-btn").textContent = "+ Add Trip";
+  editId = null;
+  resetForm();
+}
+
+function resetForm() {
+  $("f-date").value    = todayStr();
+  $("f-from").value    = "";
+  $("f-to").value      = "";
+  $("f-miles").value   = "";
+  $("f-purpose").value = "Client Meeting";
+  $("f-notes").value   = "";
+}
+
+function submitForm() {
+  const date    = $("f-date").value.trim();
+  const from    = $("f-from").value.trim();
+  const to      = $("f-to").value.trim();
+  const miles   = parseFloat($("f-miles").value);
+  const purpose = $("f-purpose").value;
+  const notes   = $("f-notes").value.trim();
+
+  if (!date || !from || !to || isNaN(miles) || miles <= 0) {
+    $("f-date").style.borderColor  = date    ? "" : "var(--red)";
+    $("f-from").style.borderColor  = from    ? "" : "var(--red)";
+    $("f-to").style.borderColor    = to      ? "" : "var(--red)";
+    $("f-miles").style.borderColor = (!isNaN(miles) && miles > 0) ? "" : "var(--red)";
+    return;
+  }
+
+  // reset borders
+  ["f-date","f-from","f-to","f-miles"].forEach(id => $(id).style.borderColor = "");
+
+  if (editId !== null) {
+    trips = trips.map(t => t.id === editId ? { id: editId, date, from, to, miles, purpose, notes } : t);
+    editId = null;
+  } else {
+    trips.push({ id: uid(), date, from, to, miles, purpose, notes });
+  }
+
+  save();
+  closeForm();
+  render();
+}
+
+function startEdit(id) {
+  const trip = trips.find(t => t.id === id);
+  if (!trip) return;
+  editId = id;
+  $("f-date").value    = trip.date;
+  $("f-from").value    = trip.from;
+  $("f-to").value      = trip.to;
+  $("f-miles").value   = trip.miles;
+  $("f-purpose").value = trip.purpose;
+  $("f-notes").value   = trip.notes;
+  openForm(true);
+  $("f-date").focus();
+}
+
+function deleteTrip(id) {
+  if (!confirm("Delete this trip?")) return;
+  trips = trips.filter(t => t.id !== id);
+  save();
+  render();
+}
+
+// ── Export ──
+function exportCSV() {
+  const filtered = getFiltered();
+  const header = "Date,From,To,Miles,Purpose,Notes,Reimbursement\n";
+  const rows = filtered.map(r =>
+    `${r.date},"${r.from}","${r.to}",${r.miles},"${r.purpose}","${r.notes}",${(+r.miles * rate).toFixed(2)}`
+  ).join("\n");
+  const blob = new Blob([header + rows], { type: "text/csv" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `mileage-${filterMonth || new Date().getFullYear()}.csv`;
+  a.click();
+}
+
+// ── Events ──
+$("add-btn").addEventListener("click", () => {
+  if ($("form-wrap").classList.contains("open") && editId === null) {
+    closeForm();
+  } else if (!$("form-wrap").classList.contains("open")) {
+    resetForm();
+    openForm(false);
+    $("f-date").focus();
+  }
+});
+
+$("cancel-btn").addEventListener("click", closeForm);
+$("submit-btn").addEventListener("click", submitForm);
+
+$("export-btn").addEventListener("click", exportCSV);
+
+$("rate-input").addEventListener("input", e => {
+  const v = parseFloat(e.target.value);
+  if (!isNaN(v) && v > 0) { rate = v; save(); render(); }
+});
+
+$("filter-month").addEventListener("change", e => {
+  filterMonth = e.target.value;
+  render();
+});
+
+$("clear-filter-btn").addEventListener("click", () => {
+  filterMonth = "";
+  $("filter-month").value = "";
+  render();
+});
+
+document.querySelectorAll(".sort-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const k = btn.dataset.key;
+    if (sortKey === k) sortDir = sortDir === "asc" ? "desc" : "asc";
+    else { sortKey = k; sortDir = "asc"; }
+    render();
+  });
+});
+
+// Enter key in form
+["f-date","f-from","f-to","f-miles","f-purpose","f-notes"].forEach(id => {
+  $(id).addEventListener("keydown", e => { if (e.key === "Enter") submitForm(); });
+});
+
+// ── Init ──
+load();
+$("rate-input").value = rate;
+$("f-date").value = todayStr();
+render();
+</script>
+</body>
+</html>
