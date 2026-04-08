@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Mileage Tracker · City Networks</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@600;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0d1117;--sur:#161b22;--b1:#21262d;--b2:#30363d;--tx:#e6edf3;--mu:#8b949e;--di:#484f58;--bl:#58a6ff;--gr:#3fb950;--re:#f85149;--pu:#d2a8ff;--ac:#238636}
+body{background:var(--bg);color:var(--tx);font-family:'DM Mono','Courier New',monospace;font-size:13px;min-height:100vh}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+#gmap{position:absolute;top:-9999px;left:-9999px;width:1px;height:1px}
+/* Modal */
+#modal{position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px)}
+#modal.hide{display:none}
+#mbox{background:var(--sur);border:1px solid var(--b2);border-radius:14px;padding:36px 40px;max-width:520px;width:100%}
+#mbox h2{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:10px}
+#mbox p{color:var(--mu);font-size:12px;line-height:1.8;margin-bottom:20px}
+#mbox a{color:var(--bl)}
+#kinp{background:var(--bg);border:1px solid var(--b2);color:var(--tx);padding:10px 14px;border-radius:8px;font-family:'DM Mono',monospace;font-size:12px;width:100%;outline:none;margin-bottom:14px;letter-spacing:.04em}
+#kinp:focus{border-color:var(--bl)}
+#kerr{color:var(--re);font-size:11px;margin-bottom:12px;display:none}
+.mnote{margin-top:18px;padding:12px 14px;background:var(--bg);border:1px solid var(--b1);border-radius:8px;font-size:11px;color:var(--di);line-height:1.7}
+.mnote strong{color:var(--mu)}
+/* Header */
+#hdr{background:var(--sur);border-bottom:1px solid var(--b1);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;position:sticky;top:0;z-index:100}
+#hdr h1{font-family:'Syne',sans-serif;font-weight:800;font-size:20px;letter-spacing:-.3px;color:#fff}
+.sub{color:var(--mu);font-size:11px;margin-top:2px}
+#hdr-r{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#kbadge{display:flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--b2);border-radius:20px;padding:4px 10px;font-size:11px;color:var(--mu);cursor:pointer}
+#kbadge:hover{border-color:var(--bl);color:var(--tx)}
+#kbadge .dot{width:6px;height:6px;border-radius:50%;background:var(--gr)}
+/* Buttons */
+.btn{cursor:pointer;border:none;border-radius:6px;font-family:'DM Mono',monospace;font-size:12px;padding:7px 14px;transition:opacity .15s,transform .1s}
+.btn:hover{opacity:.82;transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.btn-p{background:var(--ac);color:#fff;font-weight:600;font-size:13px;padding:8px 16px}
+.btn-g{background:var(--sur);color:var(--mu);border:1px solid var(--b2)}
+.btn-d{background:transparent;color:var(--re);border:1px solid var(--b2);padding:4px 10px;font-size:11px}
+.btn-e{background:#21262d;color:var(--mu);border:1px solid var(--b2);padding:4px 10px;font-size:11px}
+/* Inputs */
+.inp{background:var(--sur);border:1px solid var(--b2);color:var(--tx);padding:8px 10px;border-radius:6px;font-family:'DM Mono',monospace;font-size:12px;width:100%;outline:none;transition:border-color .15s}
+.inp:focus{border-color:var(--bl)}
+.inp option{background:#161b22}
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+/* Autocomplete */
+.acw{position:relative}
+.acd{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#1c2128;border:1px solid var(--b2);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.6);z-index:500;display:none}
+.acd.show{display:block}
+.aci{padding:9px 12px;color:var(--mu);cursor:pointer;font-size:12px;border-bottom:1px solid var(--b1);line-height:1.4}
+.aci:last-child{border-bottom:none}
+.aci:hover,.aci.hi{background:var(--b2);color:var(--tx)}
+.aci strong{color:var(--tx)}
+.acn{padding:9px 12px;color:var(--di);font-size:11px}
+/* Miles */
+.mw{position:relative}
+.spin{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:12px;height:12px;border:2px solid var(--b2);border-top-color:var(--bl);border-radius:50%;animation:spin .6s linear infinite;display:none}
+.mw.loading .spin{display:block}
+.inp.ok{border-color:var(--gr)!important;color:var(--gr)!important}
+.mh{font-size:10px;color:var(--di);margin-top:4px;min-height:14px}
+.mh.ok{color:var(--gr)}.mh.err{color:var(--re)}
+/* Layout */
+#main{max-width:1120px;margin:0 auto;padding:28px 24px 60px}
+#cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px}
+.card{background:var(--sur);border:1px solid var(--b1);border-radius:10px;padding:18px 22px}
+.clbl{color:var(--mu);font-size:10px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.cval{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;line-height:1}
+.cunit{color:var(--di);font-size:11px;margin-top:4px}
+#fwrap{background:var(--sur);border:1px solid var(--b2);border-radius:10px;padding:22px;margin-bottom:22px;display:none}
+#fwrap.open{display:block}
+.ftitle{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;margin-bottom:16px}
+.fr{display:grid;gap:12px;margin-bottom:12px}
+.fr4{grid-template-columns:1fr 1fr 1fr 1fr}
+.fre{grid-template-columns:1fr 2fr auto auto;align-items:end}
+.flbl{color:var(--mu);font-size:10px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px}
+#tb{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px}
+#tbl{color:var(--mu);font-size:12px}
+#tbr{display:flex;align-items:center;gap:8px}
+#twrap{background:var(--sur);border:1px solid var(--b1);border-radius:10px;overflow:hidden;overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:700px}
+thead tr{background:var(--bg);border-bottom:1px solid var(--b1)}
+th{padding:10px 14px;text-align:left;color:var(--mu);font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;white-space:nowrap}
+.sb{background:none;border:none;color:var(--mu);cursor:pointer;font-size:10px;margin-left:4px;padding:0 2px}
+.sb:hover{color:var(--tx)}
+tbody tr{border-bottom:1px solid var(--b1);transition:background .1s}
+tbody tr:hover{background:#1c2128}
+tbody tr:last-child{border-bottom:none}
+td{padding:11px 14px;font-size:12px;vertical-align:middle}
+.tmu{color:var(--mu)}.tbl{color:var(--bl);font-weight:500}.tgr{color:var(--gr);font-weight:600}
+.tdi{color:var(--di);font-size:11px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.arr{color:var(--di);margin:0 5px}
+tfoot tr{background:var(--bg);border-top:2px solid var(--b1)}tfoot td{font-weight:600}
+.erow td{padding:48px;text-align:center;color:var(--di)}
+.chip{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500;white-space:nowrap}
+#bd{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:20px}
+.bc{background:var(--sur);border-radius:8px;padding:12px 14px}
+.bmi{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-top:8px}
+.bsub{color:var(--mu);font-size:10px;margin-top:3px}
+@keyframes spin{to{transform:translateY(-50%) rotate(360deg)}}
+@media(max-width:760px){#cards{grid-template-columns:1fr 1fr}.fr4{grid-template-columns:1fr 1fr}.fre{grid-template-columns:1fr 1fr}#bd{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){#cards{grid-template-columns:1fr}#hdr{padding:14px 16px}#main{padding:18px 14px 48px}#bd{grid-template-columns:1fr}.fre{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="gmap"></div>
+
+<!-- Modal -->
+<div id="modal">
+  <div id="mbox">
+    <h2>🗝️ Google Maps API Key</h2>
+    <p>This tracker uses Google Maps for address autocomplete and automatic driving distance calculation.<br><br>
+    Paste your API key below — stored in your browser only.<br><br>
+    Need a key? Enable <strong>Maps JavaScript API</strong>, <strong>Places API (New)</strong>, and <strong>Distance Matrix API</strong> in your
+    <a href="https://console.cloud.google.com/apis/dashboard" target="_blank">Google Cloud Console</a>.</p>
+    <input id="kinp" type="text" placeholder="AIzaSy..." autocomplete="off" spellcheck="false"/>
+    <div id="kerr"></div>
+    <div style="display:flex;gap:10px"><button class="btn btn-p" id="ksave">Save &amp; Continue</button></div>
+    <div class="mnote"><strong>Required APIs:</strong> Maps JavaScript API · Places API (New) · Distance Matrix API<br>
+    Stored in localStorage. Click "Maps connected" to update anytime.</div>
+  </div>
+</div>
+
+<!-- Header -->
+<div id="hdr">
+  <div>
+    <h1>⛽ Mileage Tracker</h1>
+    <div class="sub" id="hsub">City Networks · 2026 reimbursement log</div>
+  </div>
+  <div id="hdr-r">
+    <div id="kbadge"><span class="dot"></span><span>Maps connected</span></div>
+    <span style="color:var(--mu);font-size:12px">$/mi</span>
+    <input type="number" class="inp" id="rateinp" value="0.67" step="0.01" min="0" style="width:72px;text-align:center"/>
+    <button class="btn btn-g" id="expbtn">↓ Export CSV</button>
+    <button class="btn btn-p" id="addbtn">+ Add Trip</button>
+  </div>
+</div>
+
+<!-- Main -->
+<div id="main">
+  <div id="cards">
+    <div class="card"><div class="clbl">Total Miles</div><div class="cval" id="smi" style="color:var(--bl)">0.0</div><div class="cunit">mi</div></div>
+    <div class="card"><div class="clbl">Reimbursement</div><div class="cval" id="srb" style="color:var(--gr)">$0.00</div><div class="cunit" id="srbu">all time</div></div>
+    <div class="card"><div class="clbl">Trips Logged</div><div class="cval" id="str" style="color:var(--pu)">0</div><div class="cunit">entries</div></div>
+  </div>
+
+  <div id="fwrap">
+    <div class="ftitle" id="ftitle">➕ New Trip</div>
+    <div class="fr fr4">
+      <div><div class="flbl">Date</div><input type="date" class="inp" id="fdate"/></div>
+      <div>
+        <div class="flbl">From</div>
+        <div class="acw"><input type="text" class="inp" id="ffrom" placeholder="Start typing..." autocomplete="off" spellcheck="false"/><div class="acd" id="dFrom"></div></div>
+      </div>
+      <div>
+        <div class="flbl">To</div>
+        <div class="acw"><input type="text" class="inp" id="fto" placeholder="Start typing..." autocomplete="off" spellcheck="false"/><div class="acd" id="dTo"></div></div>
+      </div>
+      <div>
+        <div class="flbl">Miles <span style="color:var(--di);font-size:9px">(auto)</span></div>
+        <div class="mw" id="mw"><input type="number" class="inp" id="fmiles" placeholder="Auto-calculated" step="0.1" min="0"/><div class="spin"></div></div>
+        <div class="mh" id="mh">Select both addresses to auto-fill</div>
+      </div>
+    </div>
+    <div class="fr fre">
+      <div><div class="flbl">Purpose</div>
+        <select class="inp" id="fpurp"><option>Client Meeting</option><option>Site Visit</option><option>Conference</option><option>Training</option><option>Other</option></select>
+      </div>
+      <div><div class="flbl">Notes</div><input type="text" class="inp" id="fnotes" placeholder="Venue, account, context..."/></div>
+      <button class="btn btn-p" id="subbtn" style="height:36px">Add</button>
+      <button class="btn btn-g" id="canbtn" style="height:36px">Cancel</button>
+    </div>
+  </div>
+
+  <div id="tb">
+    <div id="tbl"></div>
+    <div id="tbr">
+      <span style="color:var(--mu);font-size:12px">Filter month:</span>
+      <input type="month" class="inp" id="fmonth" style="width:150px"/>
+      <button class="btn btn-g" id="clrbtn" style="display:none;padding:6px 10px;font-size:11px">Clear</button>
+    </div>
+  </div>
+
+  <div id="twrap">
+    <table>
+      <thead><tr>
+        <th>Date <button class="sb" data-k="date">↕</button></th>
+        <th>From → To</th>
+        <th>Miles <button class="sb" data-k="miles">↕</button></th>
+        <th>Purpose</th><th>Notes</th><th>Amount</th><th></th>
+      </tr></thead>
+      <tbody id="tbody"></tbody>
+      <tfoot id="tfoot"></tfoot>
+    </table>
+  </div>
+  <div id="bd"></div>
+</div>
+
+<script>
+const PC={"Client Meeting":"#3b82f6","Site Visit":"#10b981","Conference":"#8b5cf6","Training":"#f59e0b","Other":"#6b7280"};
+const PURPOSES=Object.keys(PC);
+const SK="cn_mileage_v4", AK="cn_gmaps_key";
+
+let trips=[], rate=0.67, editId=null, filterMonth="", sortKey="date", sortDir="desc";
+let fromAddr="", toAddr="", distSvc=null;
+
+const $=id=>document.getElementById(id);
+const fmt$=n=>new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(n);
+const fmtD=d=>new Date(d+"T00:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+const today=()=>new Date().toISOString().split("T")[0];
+const uid=()=>Date.now()+Math.random();
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+
+function save(){try{localStorage.setItem(SK,JSON.stringify({trips,rate}))}catch(e){}}
+function load(){
+  try{const d=JSON.parse(localStorage.getItem(SK)||"{}");if(Array.isArray(d.trips))trips=d.trips;if(d.rate)rate=+d.rate}catch(e){}
+  if(!trips.length)trips=[
+    {id:1,date:"2026-04-01",from:"Hollywood, CA",to:"Downtown Los Angeles, CA",miles:14.2,purpose:"Client Meeting",notes:"Hyatt venue walkthrough"},
+    {id:2,date:"2026-04-03",from:"LAX, Los Angeles, CA",to:"Santa Monica, CA",miles:18.5,purpose:"Site Visit",notes:"Buffalo Wild Wings install check"},
+  ];
+}
+
+const getKey=()=>localStorage.getItem(AK)||"";
+const setKey=k=>localStorage.setItem(AK,k);
+
+function showModal(msg){
+  $("modal").classList.remove("hide");
+  $("kinp").value=getKey();
+  const e=$("kerr");
+  if(msg){e.textContent=msg;e.style.display="block"}else e.style.display="none";
+  setTimeout(()=>$("kinp").focus(),100);
+}
+const hideModal=()=>$("modal").classList.add("hide");
+
+function trySave(){
+  const k=$("kinp").value.trim();
+  if(!k||!k.startsWith("AIza")){$("kerr").textContent='Key must start with "AIza"';$("kerr").style.display="block";return}
+  setKey(k);$("kerr").style.display="none";hideModal();initMaps(k);
+}
+$("ksave").onclick=trySave;
+$("kinp").onkeydown=e=>{if(e.key==="Enter")trySave()};
+$("kbadge").onclick=()=>showModal();
+
+// ── Maps ──
+function initMaps(key){
+  document.querySelectorAll("script[data-gm]").forEach(s=>s.remove());
+  window._gmReady=async function(){
+    // Init a real (hidden) map — required to use Distance services
+    new google.maps.Map($("gmap"),{center:{lat:34.05,lng:-118.25},zoom:10,disableDefaultUI:true});
+    distSvc=new google.maps.DistanceMatrixService();
+    // Load Places library at runtime — the correct way to use AutocompleteSuggestion (new Places API)
+    try{
+      const placesLib=await google.maps.importLibrary("places");
+      window._AutocompleteSuggestion=placesLib.AutocompleteSuggestion;
+      console.log("[Maps] Places (New) library loaded OK");
+    }catch(e){
+      console.error("[Maps] importLibrary('places') failed:",e);
+      showModal("⚠️ Places API (New) failed to load. Make sure 'Places API (New)' is enabled in your Google Cloud Console and your API key has no domain restrictions blocking this page.");
+      return;
+    }
+    console.log("[Maps] initialized");
+    // Wire up autocomplete fields
+    wireAC("ffrom","dFrom",addr=>{fromAddr=addr;tryDist()});
+    wireAC("fto","dTo",addr=>{toAddr=addr;tryDist()});
+  };
+  const s=document.createElement("script");
+  s.dataset.gm="1";
+  // v=weekly loads the new Places library including AutocompleteSuggestion
+  s.src=`https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&libraries=places&v=weekly&callback=_gmReady`;
+  s.async=true;
+  s.onerror=()=>showModal("Failed to load Google Maps. Verify your key and that Maps JavaScript API is enabled.");
+  document.head.appendChild(s);
+}
+
+// ── Autocomplete using AutocompleteSuggestion (new Places API) ──
+function wireAC(inpId, dropId, onPick){
+  const inp=$(inpId), drop=$(dropId);
+  let timer=null, items=[], hi=-1;
+
+  inp.addEventListener("input",()=>{
+    const q=inp.value.trim();
+    hi=-1; items=[];
+    // Reset address when user types
+    if(inpId==="ffrom")fromAddr=""; else toAddr="";
+    clearTimeout(timer);
+    if(q.length<2){drop.classList.remove("show");drop.innerHTML="";return}
+    drop.innerHTML=`<div class="acn">Searching...</div>`;
+    drop.classList.add("show");
+    timer=setTimeout(()=>fetchSuggestions(q,drop,inp,onPick,arr=>{items=arr;hi=-1}),280);
+  });
+
+  inp.addEventListener("keydown",e=>{
+    if(!drop.classList.contains("show"))return;
+    if(e.key==="ArrowDown"){e.preventDefault();hi=Math.min(hi+1,items.length-1);hilite(drop,hi)}
+    else if(e.key==="ArrowUp"){e.preventDefault();hi=Math.max(hi-1,0);hilite(drop,hi)}
+    else if(e.key==="Enter"&&hi>=0){e.preventDefault();drop.querySelectorAll(".aci")[hi]?.dispatchEvent(new Event("mousedown"))}
+    else if(e.key==="Escape")drop.classList.remove("show");
+  });
+
+  document.addEventListener("click",e=>{
+    if(!inp.contains(e.target)&&!drop.contains(e.target))drop.classList.remove("show");
+  });
+}
+
+function hilite(drop,hi){
+  drop.querySelectorAll(".aci").forEach((el,i)=>el.classList.toggle("hi",i===hi));
+}
+
+async function fetchSuggestions(q, drop, inp, onPick, setItems){
+  if(!window._AutocompleteSuggestion){
+    drop.innerHTML=`<div class="acn">Maps not ready — check API key</div>`;
+    setItems([]);
+    return;
+  }
+  try{
+    const {suggestions}=await window._AutocompleteSuggestion.fetchAutocompleteSuggestions({input:q});
+    drop.innerHTML="";
+    if(!suggestions?.length){drop.innerHTML=`<div class="acn">No results</div>`;setItems([]);return}
+    const preds=suggestions.filter(s=>s.placePrediction).map(s=>s.placePrediction);
+    setItems(preds);
+    preds.slice(0,5).forEach(pred=>{
+      const el=document.createElement("div");
+      el.className="aci";
+      const main=pred.mainText?.toString()||"";
+      const sec=pred.secondaryText?.toString()||"";
+      el.innerHTML=`<strong>${esc(main)}</strong>${sec?`<br><span style="font-size:10px;color:var(--di)">${esc(sec)}</span>`:""}`;
+      el.addEventListener("mousedown",async ev=>{
+        ev.preventDefault();
+        drop.classList.remove("show");drop.innerHTML="";
+        const place=pred.toPlace();
+        await place.fetchFields({fields:["formattedAddress","displayName"]});
+        const addr=place.formattedAddress||place.displayName?.text||main+(sec?", "+sec:"");
+        inp.value=addr;
+        onPick(addr);
+      });
+      drop.appendChild(el);
+    });
+  }catch(err){
+    console.error("[AC] fetchAutocompleteSuggestions error:",err);
+    // Surface a more useful error so the user knows if the API isn't enabled
+    const hint=err?.message?.toLowerCase().includes("not authorized")||err?.code==="NOT_AUTHORIZED"
+      ?"Enable 'Places API (New)' in Google Cloud Console"
+      :"No results";
+    drop.innerHTML=`<div class="acn">${hint}</div>`;
+    setItems([]);
+  }
+}
+
+// ── Distance Matrix ──
+function tryDist(){
+  console.log("[Dist] from:",fromAddr," to:",toAddr);
+  if(!fromAddr||!toAddr||!distSvc)return;
+  const inp=$("fmiles");
+  inp.value="";inp.classList.remove("ok");
+  $("mw").classList.add("loading");
+  hint("Calculating driving distance...");
+  distSvc.getDistanceMatrix(
+    {origins:[fromAddr],destinations:[toAddr],travelMode:google.maps.TravelMode.DRIVING,unitSystem:google.maps.UnitSystem.IMPERIAL},
+    (res,status)=>{
+      $("mw").classList.remove("loading");
+      console.log("[Dist] status:",status,"el status:",res?.rows?.[0]?.elements?.[0]?.status);
+      if(status==="OK"&&res.rows[0].elements[0].status==="OK"){
+        const el=res.rows[0].elements[0];
+        const miles=Math.round(el.distance.value/1609.344*10)/10;
+        inp.value=miles;inp.classList.add("ok");
+        hint(`✓ ${el.duration.text} drive · ${el.distance.text}`,"ok");
+      }else{
+        hint("Could not calculate — enter miles manually.","err");
+      }
+    }
+  );
+}
+
+function hint(t,c){const h=$("mh");h.textContent=t;h.className="mh"+(c?" "+c:"")}
+function resetMi(){$("fmiles").value="";$("fmiles").classList.remove("ok");$("mw").classList.remove("loading");hint("Select both addresses to auto-fill")}
+
+// ── Render ──
+function getF(){
+  let t=trips.filter(r=>filterMonth?r.date.startsWith(filterMonth):true);
+  t.sort((a,b)=>{let av=a[sortKey],bv=b[sortKey];if(sortKey==="miles"){av=+av;bv=+bv}return av<bv?(sortDir==="asc"?-1:1):av>bv?(sortDir==="asc"?1:-1):0});
+  return t;
+}
+function render(){
+  const f=getF(),tm=f.reduce((s,r)=>s+ +r.miles,0),tr2=tm*rate;
+  $("smi").textContent=tm.toFixed(1);$("srb").textContent=fmt$(tr2);$("str").textContent=f.length;
+  $("srbu").textContent=filterMonth?"this month":"all time";
+  $("hsub").textContent=`City Networks · $${rate}/mi · ${new Date().getFullYear()} reimbursement log`;
+  $("clrbtn").style.display=filterMonth?"inline-block":"none";
+  $("tbl").textContent=`${f.length} trip${f.length!==1?"s":""} · ${tm.toFixed(1)} mi · ${fmt$(tr2)}`;
+  document.querySelectorAll(".sb").forEach(b=>{const k=b.dataset.k;b.textContent=sortKey===k?(sortDir==="asc"?"↑":"↓"):"↕"});
+  const tb=$("tbody");tb.innerHTML="";
+  if(!f.length){tb.innerHTML=`<tr class="erow"><td colspan="7">No trips yet. Add your first trip above.</td></tr>`}
+  else f.forEach(trip=>{
+    const c=PC[trip.purpose]||"#6b7280",tr=document.createElement("tr");
+    tr.innerHTML=`<td class="tmu">${fmtD(trip.date)}</td><td>${esc(trip.from)}<span class="arr">→</span>${esc(trip.to)}</td><td class="tbl">${(+trip.miles).toFixed(1)}</td><td><span class="chip" style="background:${c}22;color:${c}">${esc(trip.purpose)}</span></td><td class="tdi" title="${esc(trip.notes||"")}">${esc(trip.notes||"—")}</td><td class="tgr">${fmt$(+trip.miles*rate)}</td><td><div style="display:flex;gap:6px"><button class="btn btn-e" onclick="doEdit(${trip.id})">Edit</button><button class="btn btn-d" onclick="doDel(${trip.id})">✕</button></div></td>`;
+    tb.appendChild(tr);
+  });
+  $("tfoot").innerHTML=f.length?`<tr><td colspan="2" class="tmu" style="font-size:11px">TOTAL · ${f.length} trips</td><td class="tbl" style="font-size:14px">${tm.toFixed(1)}</td><td colspan="2"></td><td class="tgr" style="font-size:15px">${fmt$(tr2)}</td><td></td></tr>`:"";
+  const bd=$("bd");bd.innerHTML="";
+  if(f.length)PURPOSES.forEach(p=>{
+    const pt=f.filter(t=>t.purpose===p);if(!pt.length)return;
+    const pm=pt.reduce((s,t)=>s+ +t.miles,0),c=PC[p],d=document.createElement("div");
+    d.className="bc";d.style.border=`1px solid ${c}33`;
+    d.innerHTML=`<span class="chip" style="background:${c}22;color:${c}">${p}</span><div class="bmi">${pm.toFixed(1)} mi</div><div class="bsub">${fmt$(pm*rate)} · ${pt.length} trip${pt.length!==1?"s":""}</div>`;
+    bd.appendChild(d);
+  });
+}
+
+// ── Form ──
+function openForm(isEdit){$("fwrap").classList.add("open");$("ftitle").textContent=isEdit?"✏️ Edit Trip":"➕ New Trip";$("subbtn").textContent=isEdit?"Save":"Add";$("addbtn").textContent="− Close"}
+function closeForm(){$("fwrap").classList.remove("open");$("addbtn").textContent="+ Add Trip";editId=null;clearForm()}
+function clearForm(){
+  $("fdate").value=today();$("ffrom").value="";$("fto").value="";$("fmiles").value="";
+  $("fpurp").value="Client Meeting";$("fnotes").value="";
+  fromAddr="";toAddr="";$("fmiles").classList.remove("ok");
+  $("dFrom").classList.remove("show");$("dFrom").innerHTML="";
+  $("dTo").classList.remove("show");$("dTo").innerHTML="";
+  resetMi();
+}
+function doSubmit(){
+  const date=$("fdate").value.trim(),from=$("ffrom").value.trim(),to=$("fto").value.trim();
+  const miles=parseFloat($("fmiles").value);
+  const ok=date&&from&&to&&!isNaN(miles)&&miles>0;
+  $("fdate").style.borderColor=date?"":"var(--re)";
+  $("ffrom").style.borderColor=from?"":"var(--re)";
+  $("fto").style.borderColor=to?"":"var(--re)";
+  $("fmiles").style.borderColor=(!isNaN(miles)&&miles>0)?"":"var(--re)";
+  if(!ok)return;
+  ["fdate","ffrom","fto","fmiles"].forEach(id=>$(id).style.borderColor="");
+  const entry={date,from,to,miles,purpose:$("fpurp").value,notes:$("fnotes").value.trim()};
+  if(editId!==null){trips=trips.map(t=>t.id===editId?{...entry,id:editId}:t);editId=null}
+  else trips.push({...entry,id:uid()});
+  save();closeForm();render();
+}
+function doEdit(id){
+  const trip=trips.find(t=>t.id===id);if(!trip)return;
+  editId=id;
+  $("fdate").value=trip.date;$("ffrom").value=trip.from;$("fto").value=trip.to;
+  $("fmiles").value=trip.miles;$("fpurp").value=trip.purpose;$("fnotes").value=trip.notes||"";
+  fromAddr=trip.from;toAddr=trip.to;
+  hint("Re-select addresses to recalculate, or edit miles directly");
+  openForm(true);$("ffrom").focus();
+}
+function doDel(id){if(!confirm("Delete this trip?"))return;trips=trips.filter(t=>t.id!==id);save();render()}
+
+// ── Events ──
+$("addbtn").onclick=()=>{
+  if($("fwrap").classList.contains("open")&&!editId)closeForm();
+  else if(!$("fwrap").classList.contains("open")){clearForm();openForm(false);$("ffrom").focus()}
+};
+$("canbtn").onclick=closeForm;$("subbtn").onclick=doSubmit;
+$("expbtn").onclick=()=>{
+  const f=getF();
+  const blob=new Blob(["Date,From,To,Miles,Purpose,Notes,Reimbursement\n"+f.map(r=>`${r.date},"${r.from}","${r.to}",${r.miles},"${r.purpose}","${r.notes||""}",${(+r.miles*rate).toFixed(2)}`).join("\n")],{type:"text/csv"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`mileage-${filterMonth||new Date().getFullYear()}.csv`;a.click();
+};
+$("rateinp").oninput=e=>{const v=parseFloat(e.target.value);if(!isNaN(v)&&v>0){rate=v;save();render()}};
+$("fmonth").onchange=e=>{filterMonth=e.target.value;render()};
+$("clrbtn").onclick=()=>{filterMonth="";$("fmonth").value="";render()};
+document.querySelectorAll(".sb").forEach(b=>b.onclick=()=>{
+  const k=b.dataset.k;
+  if(sortKey===k)sortDir=sortDir==="asc"?"desc":"asc";else{sortKey=k;sortDir="asc"}
+  render();
+});
+["fpurp","fnotes"].forEach(id=>$(id).onkeydown=e=>{if(e.key==="Enter")doSubmit()});
+
+// ── Init ──
+load();$("rateinp").value=rate;$("fdate").value=today();render();
+const key=getKey();
+if(key&&key.startsWith("AIza")){hideModal();initMaps(key)}else showModal();
+</script>
+</body>
+</html>
