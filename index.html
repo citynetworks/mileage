@@ -17,7 +17,7 @@ body{background:var(--bg);color:var(--tx);font-family:'DM Mono','Courier New',mo
 ::-webkit-scrollbar-track{background:var(--bg)}
 ::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
 
-/* ── Modal ── */
+/* Modal */
 #modal{position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px)}
 #modal.hide{display:none}
 #mbox{background:var(--sur);border:1px solid var(--b2);border-radius:14px;padding:36px 40px;max-width:520px;width:100%;animation:fi .25s}
@@ -30,16 +30,16 @@ body{background:var(--bg);color:var(--tx);font-family:'DM Mono','Courier New',mo
 .mnote{margin-top:18px;padding:12px 14px;background:var(--bg);border:1px solid var(--b1);border-radius:8px;font-size:11px;color:var(--di);line-height:1.7}
 .mnote strong{color:var(--mu)}
 
-/* ── Header ── */
+/* Header */
 #hdr{background:var(--sur);border-bottom:1px solid var(--b1);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;position:sticky;top:0;z-index:100}
 #hdr h1{font-family:'Syne',sans-serif;font-weight:800;font-size:20px;letter-spacing:-.3px;color:#fff}
 .sub{color:var(--mu);font-size:11px;margin-top:2px}
-#hdr-r{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#hdrr{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 #kbadge{display:flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--b2);border-radius:20px;padding:4px 10px;font-size:11px;color:var(--mu);cursor:pointer;transition:border-color .15s}
 #kbadge:hover{border-color:var(--bl);color:var(--tx)}
-#kbadge .dot{width:6px;height:6px;border-radius:50%;background:var(--gr);flex-shrink:0}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--gr);flex-shrink:0}
 
-/* ── Buttons ── */
+/* Buttons */
 .btn{cursor:pointer;border:none;border-radius:6px;font-family:'DM Mono',monospace;font-size:12px;padding:7px 14px;transition:opacity .15s,transform .1s}
 .btn:hover{opacity:.82;transform:translateY(-1px)}
 .btn:active{transform:translateY(0)}
@@ -48,35 +48,33 @@ body{background:var(--bg);color:var(--tx);font-family:'DM Mono','Courier New',mo
 .btn-d{background:transparent;color:var(--re);border:1px solid var(--b2);padding:4px 10px;font-size:11px}
 .btn-e{background:#21262d;color:var(--mu);border:1px solid var(--b2);padding:4px 10px;font-size:11px}
 
-/* ── Inputs ── */
+/* Inputs */
 .inp{background:var(--sur);border:1px solid var(--b2);color:var(--tx);padding:8px 10px;border-radius:6px;font-family:'DM Mono',monospace;font-size:12px;width:100%;outline:none;transition:border-color .15s}
 .inp:focus{border-color:var(--bl)}
 .inp option{background:#161b22}
-input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
 
-/* ── Autocomplete dropdown ── */
-.ac-wrap{position:relative;width:100%}
-.ac-list{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#1c2128;border:1px solid var(--b2);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.55);z-index:200;display:none;max-height:220px;overflow-y:auto}
-.ac-list.open{display:block}
-.ac-item{padding:9px 12px;color:var(--mu);cursor:pointer;font-size:12px;border-bottom:1px solid var(--b1);line-height:1.4}
-.ac-item:last-child{border-bottom:none}
-.ac-item:hover,.ac-item.sel{background:var(--b2);color:var(--tx)}
-.ac-item strong{color:var(--tx)}
-.ac-loading{padding:9px 12px;color:var(--di);font-size:11px}
+/* Autocomplete */
+.acw{position:relative;width:100%}
+.acl{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#1c2128;border:1px solid var(--b2);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.6);z-index:500;display:none;overflow:hidden}
+.acl.open{display:block}
+.aci{padding:9px 12px;color:var(--mu);cursor:pointer;font-size:12px;border-bottom:1px solid var(--b1);line-height:1.5}
+.aci:last-child{border-bottom:none}
+.aci:hover,.aci.hi{background:var(--b2);color:var(--tx)}
+.aci strong{color:var(--tx);display:block}
+.aci span{font-size:10px;color:var(--di)}
+.acmsg{padding:9px 12px;font-size:11px;color:var(--di)}
 
-/* ── Miles field ── */
-.miles-wrap{position:relative}
+/* Miles */
+.mwrap{position:relative}
 .spin{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:12px;height:12px;border:2px solid var(--b2);border-top-color:var(--bl);border-radius:50%;animation:spin .6s linear infinite;display:none}
-.miles-wrap.loading .spin{display:block}
+.mwrap.loading .spin{display:block}
 .inp.ok{border-color:var(--gr)!important;color:var(--gr)!important}
 .mhint{font-size:10px;color:var(--di);margin-top:4px;min-height:14px}
-.mhint.ok{color:var(--gr)}
-.mhint.err{color:var(--re)}
+.mhint.ok{color:var(--gr)}.mhint.err{color:var(--re)}
 
-/* ── Main ── */
+/* Layout */
 #main{max-width:1120px;margin:0 auto;padding:28px 24px 60px}
-
-/* Cards */
 #cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px}
 .card{background:var(--sur);border:1px solid var(--b1);border-radius:10px;padding:18px 22px}
 .clbl{color:var(--mu);font-size:10px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
@@ -88,8 +86,8 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 #fwrap.open{display:block}
 .ftitle{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;margin-bottom:16px}
 .frow{display:grid;gap:12px;margin-bottom:12px}
-.frow4{grid-template-columns:1fr 1fr 1fr 1fr}
-.frowend{grid-template-columns:1fr 2fr auto auto;align-items:end}
+.fr4{grid-template-columns:1fr 1fr 1fr 1fr}
+.frend{grid-template-columns:1fr 2fr auto auto;align-items:end}
 .flbl{color:var(--mu);font-size:10px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px}
 
 /* Toolbar */
@@ -125,8 +123,8 @@ tfoot td{font-weight:600}
 @keyframes fi{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
 @keyframes spin{to{transform:translateY(-50%) rotate(360deg)}}
 
-@media(max-width:760px){#cards{grid-template-columns:1fr 1fr}.frow4{grid-template-columns:1fr 1fr}.frowend{grid-template-columns:1fr 1fr}#bd{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:480px){#cards{grid-template-columns:1fr}#hdr{padding:14px 16px}#main{padding:18px 14px 48px}#bd{grid-template-columns:1fr}.frowend{grid-template-columns:1fr}}
+@media(max-width:760px){#cards{grid-template-columns:1fr 1fr}.fr4{grid-template-columns:1fr 1fr}.frend{grid-template-columns:1fr 1fr}#bd{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){#cards{grid-template-columns:1fr}#hdr{padding:14px 16px}#main{padding:18px 14px 48px}#bd{grid-template-columns:1fr}.frend{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -136,16 +134,14 @@ tfoot td{font-weight:600}
   <div id="mbox">
     <h2>🗝️ Google Maps API Key</h2>
     <p>This tracker uses Google Maps for address suggestions and automatic driving distance calculation.<br><br>
-    Paste your API key below — saved to your browser only, never sent elsewhere.<br><br>
-    Need a key? Enable <strong>Maps JavaScript API</strong>, <strong>Places API</strong>, and <strong>Distance Matrix API</strong> in your
+    Paste your key below. Stored in your browser only, never sent anywhere else.<br><br>
+    Need a key? Enable <strong>Places API</strong> and <strong>Distance Matrix API</strong> in your
     <a href="https://console.cloud.google.com/apis/dashboard" target="_blank">Google Cloud Console</a>.</p>
     <input id="kinp" type="text" placeholder="AIzaSy..." autocomplete="off" spellcheck="false"/>
     <div id="kerr"></div>
-    <div style="display:flex;gap:10px">
-      <button class="btn btn-p" id="ksave">Save &amp; Continue</button>
-    </div>
-    <div class="mnote"><strong>Required:</strong> Maps JavaScript API · Places API · Distance Matrix API<br>
-    Stored in localStorage on this device only. Click the "Maps connected" badge to update anytime.</div>
+    <button class="btn btn-p" id="ksave">Save &amp; Continue</button>
+    <div class="mnote"><strong>Required APIs:</strong> Maps JavaScript API · Places API · Distance Matrix API<br>
+    Stored in localStorage. Click the "Maps connected" badge to update anytime.</div>
   </div>
 </div>
 
@@ -155,7 +151,7 @@ tfoot td{font-weight:600}
     <h1>⛽ Mileage Tracker</h1>
     <div class="sub" id="hsub">City Networks · 2026 reimbursement log</div>
   </div>
-  <div id="hdr-r">
+  <div id="hdrr">
     <div id="kbadge"><span class="dot"></span><span>Maps connected</span></div>
     <span style="color:var(--mu);font-size:12px">$/mi</span>
     <input type="number" class="inp" id="rate" value="0.67" step="0.01" min="0" style="width:72px;text-align:center"/>
@@ -166,54 +162,48 @@ tfoot td{font-weight:600}
 
 <!-- Main -->
 <div id="main">
-
-  <!-- Cards -->
   <div id="cards">
     <div class="card"><div class="clbl">Total Miles</div><div class="cval" id="smi" style="color:var(--bl)">0.0</div><div class="cunit">mi</div></div>
     <div class="card"><div class="clbl">Reimbursement</div><div class="cval" id="srb" style="color:var(--gr)">$0.00</div><div class="cunit" id="srbu">all time</div></div>
     <div class="card"><div class="clbl">Trips Logged</div><div class="cval" id="str" style="color:var(--pu)">0</div><div class="cunit">entries</div></div>
   </div>
 
-  <!-- Form -->
   <div id="fwrap">
     <div class="ftitle" id="ftitle">➕ New Trip</div>
-    <div class="frow frow4">
+    <div class="frow fr4">
       <div>
         <div class="flbl">Date</div>
         <input type="date" class="inp" id="fdate"/>
       </div>
       <div>
         <div class="flbl">From</div>
-        <div class="ac-wrap" id="from-wrap">
+        <div class="acw">
           <input type="text" class="inp" id="ffrom" placeholder="Start typing..." autocomplete="off" spellcheck="false"/>
-          <div class="ac-list" id="from-list"></div>
+          <div class="acl" id="froml"></div>
         </div>
       </div>
       <div>
         <div class="flbl">To</div>
-        <div class="ac-wrap" id="to-wrap">
+        <div class="acw">
           <input type="text" class="inp" id="fto" placeholder="Start typing..." autocomplete="off" spellcheck="false"/>
-          <div class="ac-list" id="to-list"></div>
+          <div class="acl" id="tol"></div>
         </div>
       </div>
       <div>
         <div class="flbl">Miles <span style="color:var(--di);font-size:9px">(auto)</span></div>
-        <div class="miles-wrap" id="mwrap">
+        <div class="mwrap" id="mwrap">
           <input type="number" class="inp" id="fmiles" placeholder="Auto-calculated" step="0.1" min="0"/>
           <div class="spin"></div>
         </div>
         <div class="mhint" id="mhint">Select both addresses to auto-fill</div>
       </div>
     </div>
-    <div class="frow frowend">
+    <div class="frow frend">
       <div>
         <div class="flbl">Purpose</div>
         <select class="inp" id="fpurp">
-          <option>Client Meeting</option>
-          <option>Site Visit</option>
-          <option>Conference</option>
-          <option>Training</option>
-          <option>Other</option>
+          <option>Client Meeting</option><option>Site Visit</option>
+          <option>Conference</option><option>Training</option><option>Other</option>
         </select>
       </div>
       <div>
@@ -225,7 +215,6 @@ tfoot td{font-weight:600}
     </div>
   </div>
 
-  <!-- Toolbar -->
   <div id="tb">
     <div id="tbl"></div>
     <div id="tbr">
@@ -235,59 +224,48 @@ tfoot td{font-weight:600}
     </div>
   </div>
 
-  <!-- Table -->
   <div id="twrap">
     <table>
       <thead><tr>
         <th>Date <button class="sb" data-k="date">↕</button></th>
         <th>From → To</th>
         <th>Miles <button class="sb" data-k="miles">↕</button></th>
-        <th>Purpose</th>
-        <th>Notes</th>
-        <th>Amount</th>
-        <th></th>
+        <th>Purpose</th><th>Notes</th><th>Amount</th><th></th>
       </tr></thead>
       <tbody id="tbody"></tbody>
       <tfoot id="tfoot"></tfoot>
     </table>
   </div>
-
   <div id="bd"></div>
 </div>
 
 <script>
-// ── Config ──
-const PC = {"Client Meeting":"#3b82f6","Site Visit":"#10b981","Conference":"#8b5cf6","Training":"#f59e0b","Other":"#6b7280"};
-const PURPOSES = Object.keys(PC);
-const SK = "cn_mileage_v2";
-const AK = "cn_gmaps_key";
+const PC={"Client Meeting":"#3b82f6","Site Visit":"#10b981","Conference":"#8b5cf6","Training":"#f59e0b","Other":"#6b7280"};
+const PURPOSES=Object.keys(PC);
+const SK="cn_mileage_v3", AK="cn_gmaps_key";
 
-// ── State ──
 let trips=[], rate=0.67, editId=null, filterMonth="", sortKey="date", sortDir="desc";
-let mapsReady=false;
-let acSvc=null, fromPlaceId=null, toPlaceId=null, fromAddr="", toAddr="";
+let fromAddr="", toAddr="";
 
-// ── Utils ──
 const $=id=>document.getElementById(id);
 const fmt$=n=>new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(n);
 const fmtD=d=>new Date(d+"T00:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
 const today=()=>new Date().toISOString().split("T")[0];
 const uid=()=>Date.now()+Math.random();
 const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const getKey=()=>localStorage.getItem(AK)||"";
+const setKey=k=>localStorage.setItem(AK,k);
 
-// ── Persistence ──
 function save(){try{localStorage.setItem(SK,JSON.stringify({trips,rate}))}catch(e){}}
 function load(){
   try{const d=JSON.parse(localStorage.getItem(SK)||"{}");if(Array.isArray(d.trips))trips=d.trips;if(d.rate)rate=+d.rate}catch(e){}
-  if(!trips.length) trips=[
+  if(!trips.length)trips=[
     {id:1,date:"2026-04-01",from:"Hollywood, CA",to:"Downtown Los Angeles, CA",miles:14.2,purpose:"Client Meeting",notes:"Hyatt venue walkthrough"},
     {id:2,date:"2026-04-03",from:"LAX, Los Angeles, CA",to:"Santa Monica, CA",miles:18.5,purpose:"Site Visit",notes:"Buffalo Wild Wings install check"},
   ];
 }
 
-// ── API Key ──
-const getKey=()=>localStorage.getItem(AK)||"";
-const setKey=k=>localStorage.setItem(AK,k);
+// ── Modal ──
 function showModal(msg){
   $("modal").classList.remove("hide");
   $("kinp").value=getKey();
@@ -296,160 +274,149 @@ function showModal(msg){
   setTimeout(()=>$("kinp").focus(),100);
 }
 const hideModal=()=>$("modal").classList.add("hide");
-
 function trySave(){
   const k=$("kinp").value.trim();
   if(!k||!k.startsWith("AIza")){$("kerr").textContent='Key must start with "AIza"';$("kerr").style.display="block";return}
-  setKey(k);$("kerr").style.display="none";hideModal();loadMaps(k);
+  setKey(k);$("kerr").style.display="none";hideModal();
 }
 $("ksave").onclick=trySave;
 $("kinp").onkeydown=e=>{if(e.key==="Enter")trySave()};
 $("kbadge").onclick=()=>showModal();
 
-// ── Load Maps ──
-function loadMaps(key){
-  const old=document.querySelector("script[data-gm]");
-  if(old)old.remove();
-  const s=document.createElement("script");
-  s.dataset.gm="1";
-  s.async=true;
-  // Load with Places library, legacy version
-  s.src=`https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&libraries=places&callback=_mapsReady`;
-  s.onerror=()=>showModal("Failed to load Google Maps. Verify your key and that Maps JavaScript API is enabled.");
-  document.head.appendChild(s);
+// ── API calls via Maps JS SDK (loaded once, no map div needed for these services) ──
+let mapsLoaded=false;
+let acService=null, geocoder=null, distService=null;
+let mapsLoadPromise=null;
+
+function ensureMaps(){
+  if(mapsLoaded)return Promise.resolve();
+  if(mapsLoadPromise)return mapsLoadPromise;
+  mapsLoadPromise=new Promise((resolve,reject)=>{
+    const key=getKey();
+    window.__mapsReady=()=>{
+      // Init services — these do NOT require a visible map element
+      acService=new google.maps.places.AutocompleteService();
+      distService=new google.maps.DistanceMatrixService();
+      geocoder=new google.maps.Geocoder();
+      mapsLoaded=true;
+      resolve();
+    };
+    const s=document.createElement("script");
+    s.src=`https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&libraries=places&callback=__mapsReady&loading=async`;
+    s.onerror=()=>reject(new Error("Maps failed to load"));
+    document.head.appendChild(s);
+  });
+  return mapsLoadPromise;
 }
 
-window._mapsReady=function(){
-  mapsReady=true;
-  // Build AutocompleteService (does NOT require a map div)
-  acSvc=new google.maps.places.AutocompleteService();
-  console.log("Maps ready, AutocompleteService created");
-  setupAC("ffrom","from-list",true);
-  setupAC("fto","to-list",false);
-};
+async function acSuggest(input){
+  try{
+    await ensureMaps();
+    return new Promise(resolve=>{
+      acService.getPlacePredictions(
+        {input, types:["geocode","establishment"]},
+        (preds,status)=>{
+          if(status===google.maps.places.PlacesServiceStatus.OK)resolve(preds||[]);
+          else resolve([]);
+        }
+      );
+    });
+  }catch(e){return[]}
+}
 
-// ── Custom Autocomplete using AutocompleteService ──
-function setupAC(inputId, listId, isFrom){
-  const inp=$( inputId);
-  const list=$(listId);
-  let debounce=null;
+async function calcDistance(origin,destination){
+  await ensureMaps();
+  return new Promise(resolve=>{
+    distService.getDistanceMatrix(
+      {origins:[origin],destinations:[destination],travelMode:google.maps.TravelMode.DRIVING,unitSystem:google.maps.UnitSystem.IMPERIAL},
+      (res,status)=>resolve({res,status})
+    );
+  });
+}
+
+// ── Autocomplete UI ──
+function setupAC(inpId, listId, isFrom){
+  const inp=$(inpId), list=$(listId);
+  let timer=null, hiIdx=-1;
+
+  function closeList(){list.classList.remove("open");list.innerHTML="";hiIdx=-1}
 
   inp.addEventListener("input",()=>{
     const val=inp.value.trim();
-    if(!val||val.length<2){list.classList.remove("open");list.innerHTML="";return}
-    clearTimeout(debounce);
-    debounce=setTimeout(()=>fetchSuggestions(val,list,inp,isFrom),250);
-    // Reset selection when user types
-    if(isFrom){fromPlaceId=null;fromAddr="";}
-    else{toPlaceId=null;toAddr="";}
-    resetMiles();
-  });
-
-  inp.addEventListener("blur",()=>{
-    // Delay so click on item registers first
-    setTimeout(()=>list.classList.remove("open"),200);
-  });
-
-  inp.addEventListener("keydown",e=>{
-    const items=list.querySelectorAll(".ac-item");
-    const sel=list.querySelector(".ac-item.sel");
-    if(e.key==="ArrowDown"){
-      e.preventDefault();
-      const next=sel?sel.nextElementSibling:items[0];
-      if(next){sel&&sel.classList.remove("sel");next.classList.add("sel")}
-    }else if(e.key==="ArrowUp"){
-      e.preventDefault();
-      const prev=sel?sel.previousElementSibling:items[items.length-1];
-      if(prev){sel&&sel.classList.remove("sel");prev.classList.add("sel")}
-    }else if(e.key==="Enter"){
-      e.preventDefault();
-      if(sel)sel.click();
-    }else if(e.key==="Escape"){
-      list.classList.remove("open");
-    }
-  });
-}
-
-function fetchSuggestions(query,list,inp,isFrom){
-  if(!acSvc)return;
-  list.innerHTML=`<div class="ac-loading">Searching...</div>`;
-  list.classList.add("open");
-
-  acSvc.getPlacePredictions(
-    {input:query, types:["geocode","establishment"]},
-    (predictions,status)=>{
+    // Reset addr when user types
+    if(isFrom){fromAddr=""}else{toAddr="";}
+    clearTimeout(timer);
+    if(val.length<2){closeList();return}
+    timer=setTimeout(async()=>{
+      list.innerHTML=`<div class="acmsg">Searching...</div>`;
+      list.classList.add("open");
+      const preds=await acSuggest(val);
       list.innerHTML="";
-      if(status!==google.maps.places.PlacesServiceStatus.OK||!predictions||!predictions.length){
-        list.innerHTML=`<div class="ac-loading">No results</div>`;
-        return;
-      }
-      predictions.slice(0,5).forEach(pred=>{
+      if(!preds.length){list.innerHTML=`<div class="acmsg">No results</div>`;return}
+      preds.slice(0,5).forEach((p,i)=>{
         const item=document.createElement("div");
-        item.className="ac-item";
-        const main=pred.structured_formatting?.main_text||pred.description;
-        const sec=pred.structured_formatting?.secondary_text||"";
-        item.innerHTML=`<strong>${esc(main)}</strong>${sec?`<br><span style="font-size:10px;color:var(--di)">${esc(sec)}</span>`:""}`;
+        item.className="aci";
+        const main=p.structured_formatting?.main_text||p.description;
+        const sec=p.structured_formatting?.secondary_text||"";
+        item.innerHTML=`<strong>${esc(main)}</strong>${sec?`<span>${esc(sec)}</span>`:""}`;
         item.addEventListener("mousedown",e=>{
           e.preventDefault();
-          inp.value=pred.description;
-          list.classList.remove("open");
-          if(isFrom){fromAddr=pred.description;fromPlaceId=pred.place_id;}
-          else{toAddr=pred.description;toPlaceId=pred.place_id;}
-          checkAndCalc();
+          inp.value=p.description;
+          closeList();
+          if(isFrom)fromAddr=p.description;
+          else toAddr=p.description;
+          tryCalc();
         });
         list.appendChild(item);
       });
-    }
-  );
-}
+    },300);
+  });
 
-// ── Distance Calculation ──
-function checkAndCalc(){
-  if(!fromAddr||!toAddr)return;
-  console.log("Calculating distance:",fromAddr,"→",toAddr);
+  inp.addEventListener("blur",()=>setTimeout(closeList,200));
 
-  const inp=$("fmiles");
-  inp.value="";
-  inp.classList.remove("ok");
-  $("mwrap").classList.add("loading");
-  setHint("Calculating driving distance...");
-
-  const svc=new google.maps.DistanceMatrixService();
-  svc.getDistanceMatrix({
-    origins:[fromAddr],
-    destinations:[toAddr],
-    travelMode:google.maps.TravelMode.DRIVING,
-    unitSystem:google.maps.UnitSystem.IMPERIAL,
-  },(res,status)=>{
-    $("mwrap").classList.remove("loading");
-    console.log("Distance Matrix response:",status,res);
-    if(status==="OK"&&res.rows[0].elements[0].status==="OK"){
-      const el=res.rows[0].elements[0];
-      const miles=Math.round(el.distance.value/1609.344*10)/10;
-      inp.value=miles;
-      inp.classList.add("ok");
-      setHint(`✓ ${el.duration.text} drive · ${el.distance.text}`,"ok");
-    }else{
-      setHint("Could not calculate — enter miles manually.","err");
-      console.warn("Distance Matrix error:",status,res?.rows?.[0]?.elements?.[0]?.status);
-    }
+  inp.addEventListener("keydown",e=>{
+    const items=[...list.querySelectorAll(".aci")];
+    if(!items.length)return;
+    if(e.key==="ArrowDown"){e.preventDefault();hiIdx=Math.min(hiIdx+1,items.length-1);items.forEach((x,i)=>x.classList.toggle("hi",i===hiIdx))}
+    else if(e.key==="ArrowUp"){e.preventDefault();hiIdx=Math.max(hiIdx-1,0);items.forEach((x,i)=>x.classList.toggle("hi",i===hiIdx))}
+    else if(e.key==="Enter"&&hiIdx>=0){e.preventDefault();items[hiIdx].dispatchEvent(new MouseEvent("mousedown"))}
+    else if(e.key==="Escape")closeList();
   });
 }
 
-function resetMiles(){
+async function tryCalc(){
+  if(!fromAddr||!toAddr)return;
   const inp=$("fmiles");
   inp.value="";inp.classList.remove("ok");
+  $("mwrap").classList.add("loading");
+  setHint("Calculating driving distance...");
+
+  try{
+    const {res,status}=await calcDistance(fromAddr,toAddr);
+    $("mwrap").classList.remove("loading");
+    if(status==="OK"&&res.rows?.[0]?.elements?.[0]?.status==="OK"){
+      const el=res.rows[0].elements[0];
+      const miles=Math.round(el.distance.value/1609.344*10)/10;
+      inp.value=miles;inp.classList.add("ok");
+      setHint(`✓ ${el.duration.text} drive · ${el.distance.text}`,"ok");
+    }else{
+      setHint("Could not calculate — enter miles manually.","err");
+    }
+  }catch(err){
+    $("mwrap").classList.remove("loading");
+    setHint("Could not calculate — enter miles manually.","err");
+  }
+}
+
+function resetMiles(){
+  const inp=$("fmiles");inp.value="";inp.classList.remove("ok");
   $("mwrap").classList.remove("loading");
   setHint("Select both addresses to auto-fill");
 }
-
-function setHint(txt,cls){
-  const h=$("mhint");h.textContent=txt;
-  h.className="mhint"+(cls?" "+cls:"");
-}
+function setHint(t,c){const h=$("mhint");h.textContent=t;h.className="mhint"+(c?" "+c:"")}
 
 // ── Render ──
-function filtered(){
+function getF(){
   let t=trips.filter(r=>filterMonth?r.date.startsWith(filterMonth):true);
   t.sort((a,b)=>{
     let av=a[sortKey],bv=b[sortKey];
@@ -460,65 +427,47 @@ function filtered(){
 }
 
 function render(){
-  const f=filtered();
-  const tm=f.reduce((s,r)=>s+ +r.miles,0);
-  const tr2=tm*rate;
-  $("smi").textContent=tm.toFixed(1);
-  $("srb").textContent=fmt$(tr2);
-  $("str").textContent=f.length;
-  $("srbu").textContent=filterMonth?"this month":"all time";
+  const f=getF(),tm=f.reduce((s,r)=>s+ +r.miles,0),tr2=tm*rate;
+  $("smi").textContent=tm.toFixed(1);$("srb").textContent=fmt$(tr2);
+  $("str").textContent=f.length;$("srbu").textContent=filterMonth?"this month":"all time";
   $("hsub").textContent=`City Networks · $${rate}/mi · ${new Date().getFullYear()} reimbursement log`;
   $("clrbtn").style.display=filterMonth?"inline-block":"none";
   $("tbl").textContent=`${f.length} trip${f.length!==1?"s":""} · ${tm.toFixed(1)} mi · ${fmt$(tr2)}`;
-
-  document.querySelectorAll(".sb").forEach(b=>{
-    const k=b.dataset.k;
-    b.textContent=sortKey===k?(sortDir==="asc"?"↑":"↓"):"↕";
-  });
+  document.querySelectorAll(".sb").forEach(b=>{const k=b.dataset.k;b.textContent=sortKey===k?(sortDir==="asc"?"↑":"↓"):"↕"});
 
   const tbody=$("tbody");tbody.innerHTML="";
-  if(!f.length){
-    tbody.innerHTML=`<tr class="erow"><td colspan="7">No trips yet. Add your first trip above.</td></tr>`;
-  }else{
-    f.forEach(trip=>{
-      const c=PC[trip.purpose]||"#6b7280";
-      const tr=document.createElement("tr");
-      tr.innerHTML=`
-        <td class="tmu">${fmtD(trip.date)}</td>
-        <td>${esc(trip.from)}<span class="arr">→</span>${esc(trip.to)}</td>
-        <td class="tbl">${(+trip.miles).toFixed(1)}</td>
-        <td><span class="chip" style="background:${c}22;color:${c}">${esc(trip.purpose)}</span></td>
-        <td class="tdi" title="${esc(trip.notes||"")}">${esc(trip.notes||"—")}</td>
-        <td class="tgr">${fmt$(+trip.miles*rate)}</td>
-        <td><div style="display:flex;gap:6px">
-          <button class="btn btn-e" onclick="doEdit(${trip.id})">Edit</button>
-          <button class="btn btn-d" onclick="doDel(${trip.id})">✕</button>
-        </div></td>`;
-      tbody.appendChild(tr);
-    });
-  }
+  if(!f.length){tbody.innerHTML=`<tr class="erow"><td colspan="7">No trips yet. Add your first trip above.</td></tr>`}
+  else f.forEach(trip=>{
+    const c=PC[trip.purpose]||"#6b7280",tr=document.createElement("tr");
+    tr.innerHTML=`<td class="tmu">${fmtD(trip.date)}</td>
+      <td>${esc(trip.from)}<span class="arr">→</span>${esc(trip.to)}</td>
+      <td class="tbl">${(+trip.miles).toFixed(1)}</td>
+      <td><span class="chip" style="background:${c}22;color:${c}">${esc(trip.purpose)}</span></td>
+      <td class="tdi" title="${esc(trip.notes||"")}">${esc(trip.notes||"—")}</td>
+      <td class="tgr">${fmt$(+trip.miles*rate)}</td>
+      <td><div style="display:flex;gap:6px">
+        <button class="btn btn-e" onclick="doEdit(${trip.id})">Edit</button>
+        <button class="btn btn-d" onclick="doDel(${trip.id})">✕</button>
+      </div></td>`;
+    tbody.appendChild(tr);
+  });
 
   $("tfoot").innerHTML=f.length?`<tr>
     <td colspan="2" class="tmu" style="font-size:11px">TOTAL · ${f.length} trips</td>
     <td class="tbl" style="font-size:14px">${tm.toFixed(1)}</td>
-    <td colspan="2"></td>
-    <td class="tgr" style="font-size:15px">${fmt$(tr2)}</td>
-    <td></td>
+    <td colspan="2"></td><td class="tgr" style="font-size:15px">${fmt$(tr2)}</td><td></td>
   </tr>`:"";
 
-  const bdiv=$("bd");bdiv.innerHTML="";
-  if(f.length){
-    PURPOSES.forEach(p=>{
-      const pt=f.filter(t=>t.purpose===p);if(!pt.length)return;
-      const pm=pt.reduce((s,t)=>s+ +t.miles,0);
-      const c=PC[p];const d=document.createElement("div");
-      d.className="bcard";d.style.border=`1px solid ${c}33`;
-      d.innerHTML=`<span class="chip" style="background:${c}22;color:${c}">${p}</span>
-        <div class="bmi">${pm.toFixed(1)} mi</div>
-        <div class="bsub">${fmt$(pm*rate)} · ${pt.length} trip${pt.length!==1?"s":""}</div>`;
-      bdiv.appendChild(d);
-    });
-  }
+  const bd=$("bd");bd.innerHTML="";
+  if(f.length)PURPOSES.forEach(p=>{
+    const pt=f.filter(t=>t.purpose===p);if(!pt.length)return;
+    const pm=pt.reduce((s,t)=>s+ +t.miles,0),c=PC[p],d=document.createElement("div");
+    d.className="bcard";d.style.border=`1px solid ${c}33`;
+    d.innerHTML=`<span class="chip" style="background:${c}22;color:${c}">${p}</span>
+      <div class="bmi">${pm.toFixed(1)} mi</div>
+      <div class="bsub">${fmt$(pm*rate)} · ${pt.length} trip${pt.length!==1?"s":""}</div>`;
+    bd.appendChild(d);
+  });
 }
 
 // ── Form ──
@@ -528,26 +477,16 @@ function openForm(isEdit){
   $("subbtn").textContent=isEdit?"Save":"Add";
   $("addbtn").textContent="− Close";
 }
-function closeForm(){
-  $("fwrap").classList.remove("open");
-  $("addbtn").textContent="+ Add Trip";
-  editId=null;clearForm();
-}
+function closeForm(){$("fwrap").classList.remove("open");$("addbtn").textContent="+ Add Trip";editId=null;clearForm()}
 function clearForm(){
-  $("fdate").value=today();
-  $("ffrom").value="";$("fto").value="";$("fmiles").value="";
-  $("fpurp").value="Client Meeting";$("fnotes").value="";
-  fromAddr="";toAddr="";fromPlaceId=null;toPlaceId=null;
-  $("fmiles").classList.remove("ok");
-  resetMiles();
-  $("from-list").classList.remove("open");$("from-list").innerHTML="";
-  $("to-list").classList.remove("open");$("to-list").innerHTML="";
+  $("fdate").value=today();$("ffrom").value="";$("fto").value="";
+  $("fmiles").value="";$("fpurp").value="Client Meeting";$("fnotes").value="";
+  fromAddr="";toAddr="";$("fmiles").classList.remove("ok");resetMiles();
+  $("froml").classList.remove("open");$("froml").innerHTML="";
+  $("tol").classList.remove("open");$("tol").innerHTML="";
 }
-
 function doSubmit(){
-  const date=$("fdate").value.trim();
-  const from=$("ffrom").value.trim();
-  const to=$("fto").value.trim();
+  const date=$("fdate").value.trim(),from=$("ffrom").value.trim(),to=$("fto").value.trim();
   const miles=parseFloat($("fmiles").value);
   const ok=date&&from&&to&&!isNaN(miles)&&miles>0;
   $("fdate").style.borderColor=date?"":"var(--re)";
@@ -557,39 +496,29 @@ function doSubmit(){
   if(!ok)return;
   ["fdate","ffrom","fto","fmiles"].forEach(id=>$(id).style.borderColor="");
   const entry={date,from,to,miles,purpose:$("fpurp").value,notes:$("fnotes").value.trim()};
-  if(editId!==null){trips=trips.map(t=>t.id===editId?{...entry,id:editId}:t);editId=null;}
+  if(editId!==null){trips=trips.map(t=>t.id===editId?{...entry,id:editId}:t);editId=null}
   else trips.push({...entry,id:uid()});
   save();closeForm();render();
 }
-
 function doEdit(id){
   const trip=trips.find(t=>t.id===id);if(!trip)return;
   editId=id;
-  $("fdate").value=trip.date;
-  $("ffrom").value=trip.from;fromAddr=trip.from;
-  $("fto").value=trip.to;toAddr=trip.to;
-  $("fmiles").value=trip.miles;
-  $("fpurp").value=trip.purpose;
-  $("fnotes").value=trip.notes||"";
-  $("mhint").textContent="Re-select addresses to recalculate, or edit miles directly";
+  $("fdate").value=trip.date;$("ffrom").value=trip.from;fromAddr=trip.from;
+  $("fto").value=trip.to;toAddr=trip.to;$("fmiles").value=trip.miles;
+  $("fpurp").value=trip.purpose;$("fnotes").value=trip.notes||"";
+  setHint("Re-select addresses to recalculate, or edit miles directly");
   openForm(true);$("ffrom").focus();
 }
-
-function doDel(id){
-  if(!confirm("Delete this trip?"))return;
-  trips=trips.filter(t=>t.id!==id);save();render();
-}
+function doDel(id){if(!confirm("Delete this trip?"))return;trips=trips.filter(t=>t.id!==id);save();render()}
 
 // ── Events ──
 $("addbtn").onclick=()=>{
   if($("fwrap").classList.contains("open")&&!editId)closeForm();
-  else if(!$("fwrap").classList.contains("open")){clearForm();openForm(false);$("ffrom").focus();}
+  else if(!$("fwrap").classList.contains("open")){clearForm();openForm(false);$("ffrom").focus()}
 };
-$("canbtn").onclick=closeForm;
-$("subbtn").onclick=doSubmit;
+$("canbtn").onclick=closeForm;$("subbtn").onclick=doSubmit;
 $("expbtn").onclick=()=>{
-  const f=filtered();
-  const rows=f.map(r=>`${r.date},"${r.from}","${r.to}",${r.miles},"${r.purpose}","${r.notes||""}",${(+r.miles*rate).toFixed(2)}`);
+  const f=getF(),rows=f.map(r=>`${r.date},"${r.from}","${r.to}",${r.miles},"${r.purpose}","${r.notes||""}",${(+r.miles*rate).toFixed(2)}`);
   const blob=new Blob(["Date,From,To,Miles,Purpose,Notes,Reimbursement\n"+rows.join("\n")],{type:"text/csv"});
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);
   a.download=`mileage-${filterMonth||new Date().getFullYear()}.csv`;a.click();
@@ -599,20 +528,16 @@ $("fmonth").onchange=e=>{filterMonth=e.target.value;render()};
 $("clrbtn").onclick=()=>{filterMonth="";$("fmonth").value="";render()};
 document.querySelectorAll(".sb").forEach(b=>b.onclick=()=>{
   const k=b.dataset.k;
-  if(sortKey===k)sortDir=sortDir==="asc"?"desc":"asc";
-  else{sortKey=k;sortDir="asc"}
-  render();
+  if(sortKey===k)sortDir=sortDir==="asc"?"desc":"asc";else{sortKey=k;sortDir="asc"}render();
 });
 ["fpurp","fnotes"].forEach(id=>$(id).onkeydown=e=>{if(e.key==="Enter")doSubmit()});
 
 // ── Init ──
-load();
-$("rate").value=rate;
-$("fdate").value=today();
-render();
+load();$("rate").value=rate;$("fdate").value=today();render();
+setupAC("ffrom","froml",true);
+setupAC("fto","tol",false);
 const key=getKey();
-if(key&&key.startsWith("AIza")){hideModal();loadMaps(key);}
-else showModal();
+if(key&&key.startsWith("AIza"))hideModal();else showModal();
 </script>
 </body>
 </html>
