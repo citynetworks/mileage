@@ -388,13 +388,11 @@
       </div>
       <div>
         <div class="field-label">From</div>
-        <div id="from-ac-wrap" style="width:100%;"></div>
-        <input type="hidden" id="f-from" />
+        <input type="text" class="inp" id="f-from" placeholder="Start typing an address..." autocomplete="new-password" spellcheck="false" />
       </div>
       <div>
         <div class="field-label">To</div>
-        <div id="to-ac-wrap" style="width:100%;"></div>
-        <input type="hidden" id="f-to" />
+        <input type="text" class="inp" id="f-to" placeholder="Start typing an address..." autocomplete="new-password" spellcheck="false" />
       </div>
       <div>
         <div class="field-label">Miles <span style="color:var(--dim);font-size:9px;letter-spacing:0;">(auto)</span></div>
@@ -547,7 +545,7 @@ function loadGoogleMaps(key) {
   const s = document.createElement("script");
   s.dataset.gmaps = "1";
   s.async = true;
-  s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&libraries=places,marker&v=weekly&callback=_gmapsLoaded`;
+  s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&libraries=places&v=3&callback=_gmapsLoaded`;
   s.onerror = () => showModal("Failed to load Google Maps. Check that your key is valid and the APIs are enabled in Google Cloud Console.");
   document.head.appendChild(s);
 }
@@ -561,54 +559,41 @@ window._gmapsLoaded = function() {
 // Store resolved addresses for distance calc
 let fromAddr = "";
 let toAddr   = "";
+let acFromInst = null;
+let acToInst   = null;
 
 function bindAutocomplete() {
   if (!gmapsReady) return;
 
-  mountPlaceAC("from-ac-wrap", (addr) => {
-    fromAddr = addr;
-    $("f-from").value = addr;
+  const fromEl = $("f-from");
+  const toEl   = $("f-to");
+
+  // Re-create instances on each form open (legacy Autocomplete, hits Places API v1 which has 0% errors)
+  acFromInst = new google.maps.places.Autocomplete(fromEl, {
+    fields: ["formatted_address", "name"],
+  });
+  acToInst = new google.maps.places.Autocomplete(toEl, {
+    fields: ["formatted_address", "name"],
+  });
+
+  acFromInst.addListener("place_changed", () => {
+    const p = acFromInst.getPlace();
+    fromAddr = p.formatted_address || p.name || fromEl.value;
+    $("f-from").value = fromAddr;
     fromSelected = true;
     maybeCalcDistance();
-  }, () => { fromSelected = false; fromAddr = ""; resetMiles(); });
+  });
 
-  mountPlaceAC("to-ac-wrap", (addr) => {
-    toAddr = addr;
-    $("f-to").value = addr;
+  acToInst.addListener("place_changed", () => {
+    const p = acToInst.getPlace();
+    toAddr = p.formatted_address || p.name || toEl.value;
+    $("f-to").value = toAddr;
     toSelected = true;
     maybeCalcDistance();
-  }, () => { toSelected = false; toAddr = ""; resetMiles(); });
-}
-
-function mountPlaceAC(wrapId, onSelect, onInput) {
-  const wrap = $(wrapId);
-  if (!wrap) return;
-  wrap.innerHTML = "";
-
-  const ac = new google.maps.places.PlaceAutocompleteElement({
-    types: ["geocode", "establishment"],
   });
 
-  ac.style.cssText = `
-    width: 100%;
-    --gmpx-color-surface: #161b22;
-    --gmpx-color-on-surface: #e6edf3;
-    --gmpx-color-on-surface-variant: #8b949e;
-    --gmpx-color-primary: #58a6ff;
-    --gmpx-font-family-base: 'DM Mono', monospace;
-    --gmpx-font-size-base: 12px;
-  `;
-
-  wrap.appendChild(ac);
-
-  ac.addEventListener("gmp-placeselect", async (e) => {
-    const place = e.placePrediction.toPlace();
-    await place.fetchFields({ fields: ["formattedAddress", "displayName", "location"] });
-    const addr = place.formattedAddress || place.displayName?.text || "";
-    onSelect(addr);
-  });
-
-  ac.addEventListener("input", onInput);
+  fromEl.oninput = () => { fromSelected = false; fromAddr = ""; resetMiles(); };
+  toEl.oninput   = () => { toSelected   = false; toAddr   = ""; resetMiles(); };
 }
 
 function setMilesHint(text, cls) {
@@ -776,11 +761,6 @@ function resetFormFields() {
   fromAddr     = "";
   toAddr       = "";
   resetMiles();
-  // Clear the PlaceAutocompleteElement inputs visually
-  const fromInput = document.querySelector("#from-ac-wrap input");
-  const toInput   = document.querySelector("#to-ac-wrap input");
-  if (fromInput) fromInput.value = "";
-  if (toInput)   toInput.value   = "";
 }
 
 function submitForm() {
@@ -822,13 +802,6 @@ function startEdit(id) {
   resetMiles();
   setMilesHint("Re-select addresses to recalculate, or edit miles directly");
   openForm(true);
-  // Populate PlaceAutocompleteElement visible inputs
-  setTimeout(() => {
-    const fromInput = document.querySelector("#from-ac-wrap input");
-    const toInput   = document.querySelector("#to-ac-wrap input");
-    if (fromInput) fromInput.value = trip.from;
-    if (toInput)   toInput.value   = trip.to;
-  }, 50);
 }
 
 function deleteTrip(id) {
