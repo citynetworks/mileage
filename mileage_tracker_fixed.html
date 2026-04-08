@@ -392,7 +392,7 @@ function render(){
   if(!f.length){tb.innerHTML=`<tr class="erow"><td colspan="7">No trips yet. Add your first trip above.</td></tr>`}
   else f.forEach(trip=>{
     const c=PC[trip.purpose]||"#6b7280",tr=document.createElement("tr");
-    tr.innerHTML=`<td class="tmu">${fmtD(trip.date)}</td><td>${esc(trip.from)}<span class="arr">→</span>${esc(trip.to)}</td><td class="tbl">${(+trip.miles).toFixed(1)}</td><td><span class="chip" style="background:${c}22;color:${c}">${esc(trip.purpose)}</span></td><td class="tdi" title="${esc(trip.notes||"")}">${esc(trip.notes||"—")}</td><td class="tgr">${fmt$(+trip.miles*rate)}</td><td><div style="display:flex;gap:6px"><button class="btn btn-e" onclick="doEdit(${trip.id})">Edit</button><button class="btn btn-d" onclick="doDel(${trip.id})">✕</button></div></td>`;
+    tr.innerHTML=`<td class="tmu">${fmtD(trip.date)}</td><td>${esc(trip.from)}<span class="arr">→</span>${esc(trip.to)}</td><td class="tbl">${(+trip.miles).toFixed(1)}</td><td><span class="chip" style="background:${c}22;color:${c}">${esc(trip.purpose)}</span></td><td class="tdi" title="${esc(trip.notes||"")}">${esc(trip.notes||"—")}</td><td class="tgr">${fmt$(+trip.miles*rate)}</td><td><div style="display:flex;gap:6px"><button class="btn btn-e" onclick="doContinue(${trip.id})" title="Start next trip from this destination">→ Continue</button><button class="btn btn-e" onclick="doEdit(${trip.id})">Edit</button><button class="btn btn-d" onclick="doDel(${trip.id})">✕</button></div></td>`;
     tb.appendChild(tr);
   });
   $("tfoot").innerHTML=f.length?`<tr><td colspan="2" class="tmu" style="font-size:11px">TOTAL · ${f.length} trips</td><td class="tbl" style="font-size:14px">${tm.toFixed(1)}</td><td colspan="2"></td><td class="tgr" style="font-size:15px">${fmt$(tr2)}</td><td></td></tr>`:"";
@@ -442,6 +442,15 @@ function doEdit(id){
   openForm(true);$("ffrom").focus();
 }
 function doDel(id){if(!confirm("Delete this trip?"))return;trips=trips.filter(t=>t.id!==id);save();render()}
+function doContinue(id){
+  const trip=trips.find(t=>t.id===id);if(!trip)return;
+  clearForm();openForm(false);
+  // Pre-fill From with this trip's destination
+  $("ffrom").value=trip.to;
+  fromAddr=trip.to;
+  hint("From pre-filled — type your next destination");
+  $("fto").focus();
+}
 
 // ── Events ──
 $("addbtn").onclick=()=>{
