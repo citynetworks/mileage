@@ -1,412 +1,214 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mileage Tracker · City Networks</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@600;800&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Mileage Tracker · City Networks</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@600;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d1117;--sur:#161b22;--b1:#21262d;--b2:#30363d;
+  --tx:#e6edf3;--mu:#8b949e;--di:#484f58;
+  --bl:#58a6ff;--gr:#3fb950;--re:#f85149;--pu:#d2a8ff;--ac:#238636;
+}
+body{background:var(--bg);color:var(--tx);font-family:'DM Mono','Courier New',monospace;font-size:13px;min-height:100vh}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
 
-    :root {
-      --bg: #0d1117;
-      --surface: #161b22;
-      --border: #21262d;
-      --border2: #30363d;
-      --text: #e6edf3;
-      --muted: #8b949e;
-      --dim: #484f58;
-      --blue: #58a6ff;
-      --green: #3fb950;
-      --red: #f85149;
-      --purple: #d2a8ff;
-      --accent-green: #238636;
-    }
+/* ── Modal ── */
+#modal{position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px)}
+#modal.hide{display:none}
+#mbox{background:var(--sur);border:1px solid var(--b2);border-radius:14px;padding:36px 40px;max-width:520px;width:100%;animation:fi .25s}
+#mbox h2{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:10px}
+#mbox p{color:var(--mu);font-size:12px;line-height:1.8;margin-bottom:20px}
+#mbox a{color:var(--bl);text-decoration:none}
+#kinp{background:var(--bg);border:1px solid var(--b2);color:var(--tx);padding:10px 14px;border-radius:8px;font-family:'DM Mono',monospace;font-size:12px;width:100%;outline:none;margin-bottom:14px;letter-spacing:.04em;transition:border-color .15s}
+#kinp:focus{border-color:var(--bl)}
+#kerr{color:var(--re);font-size:11px;margin-bottom:12px;display:none}
+.mnote{margin-top:18px;padding:12px 14px;background:var(--bg);border:1px solid var(--b1);border-radius:8px;font-size:11px;color:var(--di);line-height:1.7}
+.mnote strong{color:var(--mu)}
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'DM Mono', 'Courier New', monospace;
-      font-size: 13px;
-      min-height: 100vh;
-    }
+/* ── Header ── */
+#hdr{background:var(--sur);border-bottom:1px solid var(--b1);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;position:sticky;top:0;z-index:100}
+#hdr h1{font-family:'Syne',sans-serif;font-weight:800;font-size:20px;letter-spacing:-.3px;color:#fff}
+.sub{color:var(--mu);font-size:11px;margin-top:2px}
+#hdr-r{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#kbadge{display:flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--b2);border-radius:20px;padding:4px 10px;font-size:11px;color:var(--mu);cursor:pointer;transition:border-color .15s}
+#kbadge:hover{border-color:var(--bl);color:var(--tx)}
+#kbadge .dot{width:6px;height:6px;border-radius:50%;background:var(--gr);flex-shrink:0}
 
-    ::-webkit-scrollbar { width: 4px; height: 4px; }
-    ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+/* ── Buttons ── */
+.btn{cursor:pointer;border:none;border-radius:6px;font-family:'DM Mono',monospace;font-size:12px;padding:7px 14px;transition:opacity .15s,transform .1s}
+.btn:hover{opacity:.82;transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.btn-p{background:var(--ac);color:#fff;font-weight:600;font-size:13px;padding:8px 16px}
+.btn-g{background:var(--sur);color:var(--mu);border:1px solid var(--b2)}
+.btn-d{background:transparent;color:var(--re);border:1px solid var(--b2);padding:4px 10px;font-size:11px}
+.btn-e{background:#21262d;color:var(--mu);border:1px solid var(--b2);padding:4px 10px;font-size:11px}
 
-    /* ── API Key Modal ── */
-    #api-modal {
-      position: fixed; inset: 0; z-index: 999;
-      background: rgba(0,0,0,0.85);
-      display: flex; align-items: center; justify-content: center;
-      padding: 24px;
-      backdrop-filter: blur(4px);
-    }
-    #api-modal.hidden { display: none; }
+/* ── Inputs ── */
+.inp{background:var(--sur);border:1px solid var(--b2);color:var(--tx);padding:8px 10px;border-radius:6px;font-family:'DM Mono',monospace;font-size:12px;width:100%;outline:none;transition:border-color .15s}
+.inp:focus{border-color:var(--bl)}
+.inp option{background:#161b22}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
 
-    #api-box {
-      background: var(--surface);
-      border: 1px solid var(--border2);
-      border-radius: 14px;
-      padding: 36px 40px;
-      max-width: 520px;
-      width: 100%;
-      animation: fadeIn 0.25s ease;
-    }
+/* ── Autocomplete dropdown ── */
+.ac-wrap{position:relative;width:100%}
+.ac-list{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#1c2128;border:1px solid var(--b2);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.55);z-index:200;display:none;max-height:220px;overflow-y:auto}
+.ac-list.open{display:block}
+.ac-item{padding:9px 12px;color:var(--mu);cursor:pointer;font-size:12px;border-bottom:1px solid var(--b1);line-height:1.4}
+.ac-item:last-child{border-bottom:none}
+.ac-item:hover,.ac-item.sel{background:var(--b2);color:var(--tx)}
+.ac-item strong{color:var(--tx)}
+.ac-loading{padding:9px 12px;color:var(--di);font-size:11px}
 
-    #api-box h2 {
-      font-family: 'Syne', sans-serif;
-      font-size: 20px;
-      font-weight: 800;
-      margin-bottom: 10px;
-    }
+/* ── Miles field ── */
+.miles-wrap{position:relative}
+.spin{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:12px;height:12px;border:2px solid var(--b2);border-top-color:var(--bl);border-radius:50%;animation:spin .6s linear infinite;display:none}
+.miles-wrap.loading .spin{display:block}
+.inp.ok{border-color:var(--gr)!important;color:var(--gr)!important}
+.mhint{font-size:10px;color:var(--di);margin-top:4px;min-height:14px}
+.mhint.ok{color:var(--gr)}
+.mhint.err{color:var(--re)}
 
-    #api-box p {
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.8;
-      margin-bottom: 20px;
-    }
+/* ── Main ── */
+#main{max-width:1120px;margin:0 auto;padding:28px 24px 60px}
 
-    #api-box a { color: var(--blue); text-decoration: none; }
-    #api-box a:hover { text-decoration: underline; }
+/* Cards */
+#cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px}
+.card{background:var(--sur);border:1px solid var(--b1);border-radius:10px;padding:18px 22px}
+.clbl{color:var(--mu);font-size:10px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.cval{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;line-height:1}
+.cunit{color:var(--di);font-size:11px;margin-top:4px}
 
-    #api-key-input {
-      background: var(--bg);
-      border: 1px solid var(--border2);
-      color: var(--text);
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-family: 'DM Mono', monospace;
-      font-size: 12px;
-      width: 100%;
-      outline: none;
-      margin-bottom: 14px;
-      transition: border-color 0.15s;
-      letter-spacing: 0.04em;
-    }
-    #api-key-input:focus { border-color: var(--blue); }
-    #api-key-input::placeholder { color: var(--dim); letter-spacing: 0; }
+/* Form */
+#fwrap{background:var(--sur);border:1px solid var(--b2);border-radius:10px;padding:22px;margin-bottom:22px;display:none;animation:fi .25s}
+#fwrap.open{display:block}
+.ftitle{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;margin-bottom:16px}
+.frow{display:grid;gap:12px;margin-bottom:12px}
+.frow4{grid-template-columns:1fr 1fr 1fr 1fr}
+.frowend{grid-template-columns:1fr 2fr auto auto;align-items:end}
+.flbl{color:var(--mu);font-size:10px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px}
 
-    #api-error {
-      color: var(--red);
-      font-size: 11px;
-      margin-bottom: 12px;
-      display: none;
-      line-height: 1.6;
-    }
+/* Toolbar */
+#tb{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px}
+#tbl{color:var(--mu);font-size:12px}
+#tbr{display:flex;align-items:center;gap:8px}
 
-    .modal-note {
-      margin-top: 18px;
-      padding: 12px 14px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 11px;
-      color: var(--dim);
-      line-height: 1.7;
-    }
-    .modal-note strong { color: var(--muted); }
+/* Table */
+#twrap{background:var(--sur);border:1px solid var(--b1);border-radius:10px;overflow:hidden;overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:700px}
+thead tr{background:var(--bg);border-bottom:1px solid var(--b1)}
+th{padding:10px 14px;text-align:left;color:var(--mu);font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;white-space:nowrap}
+.sb{background:none;border:none;color:var(--mu);cursor:pointer;font-size:10px;margin-left:4px;padding:0 2px}
+.sb:hover{color:var(--tx)}
+tbody tr{border-bottom:1px solid var(--b1);transition:background .1s}
+tbody tr:hover{background:#1c2128}
+tbody tr:last-child{border-bottom:none}
+td{padding:11px 14px;font-size:12px;vertical-align:middle}
+.tmu{color:var(--mu)}.tbl{color:var(--bl);font-weight:500}.tgr{color:var(--gr);font-weight:600}
+.tdi{color:var(--di);font-size:11px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.arr{color:var(--di);margin:0 5px}
+tfoot tr{background:var(--bg);border-top:2px solid var(--b1)}
+tfoot td{font-weight:600}
+.erow td{padding:48px;text-align:center;color:var(--di)}
+.chip{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500;white-space:nowrap}
 
-    /* ── Header ── */
-    #header {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 18px 32px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 12px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
+/* Breakdown */
+#bd{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:20px}
+.bcard{background:var(--sur);border-radius:8px;padding:12px 14px}
+.bmi{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-top:8px}
+.bsub{color:var(--mu);font-size:10px;margin-top:3px}
 
-    #header h1 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; letter-spacing: -0.3px; color: #fff; }
-    .sub { color: var(--muted); font-size: 11px; margin-top: 2px; }
-    #header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+@keyframes fi{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:translateY(-50%) rotate(360deg)}}
 
-    #key-badge {
-      display: flex; align-items: center; gap: 6px;
-      background: var(--bg); border: 1px solid var(--border2);
-      border-radius: 20px; padding: 4px 10px;
-      font-size: 11px; color: var(--muted); cursor: pointer;
-      transition: border-color 0.15s;
-    }
-    #key-badge:hover { border-color: var(--blue); color: var(--text); }
-    #key-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
-
-    /* ── Buttons ── */
-    .btn {
-      cursor: pointer; border: none; border-radius: 6px;
-      font-family: 'DM Mono', monospace; font-size: 12px; padding: 7px 14px;
-      transition: opacity 0.15s, transform 0.1s;
-    }
-    .btn:hover { opacity: 0.82; transform: translateY(-1px); }
-    .btn:active { transform: translateY(0); }
-    .btn-primary { background: var(--accent-green); color: #fff; font-weight: 600; font-size: 13px; padding: 8px 16px; }
-    .btn-ghost { background: var(--surface); color: var(--muted); border: 1px solid var(--border2); }
-    .btn-danger { background: transparent; color: var(--red); border: 1px solid var(--border2); padding: 4px 10px; font-size: 11px; }
-    .btn-edit { background: #21262d; color: var(--muted); border: 1px solid var(--border2); padding: 4px 10px; font-size: 11px; }
-
-    /* ── Inputs ── */
-    .inp {
-      background: var(--surface);
-      border: 1px solid var(--border2);
-      color: var(--text);
-      padding: 8px 10px;
-      border-radius: 6px;
-      font-family: 'DM Mono', monospace;
-      font-size: 12px;
-      width: 100%;
-      outline: none;
-      transition: border-color 0.15s;
-    }
-    .inp:focus { border-color: var(--blue); }
-    .inp option { background: #161b22; }
-
-    input[type="number"]::-webkit-inner-spin-button,
-    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
-
-    .rate-inp { width: 72px; text-align: center; }
-
-    /* ── PlaceAutocompleteElement (new Places API) ── */
-    gmp-placeautocomplete {
-      width: 100%;
-    }
-    gmp-placeautocomplete input {
-      background: var(--surface) !important;
-      border: 1px solid var(--border2) !important;
-      color: var(--text) !important;
-      padding: 8px 10px !important;
-      border-radius: 6px !important;
-      font-family: 'DM Mono', monospace !important;
-      font-size: 12px !important;
-      width: 100% !important;
-      outline: none !important;
-      box-shadow: none !important;
-    }
-    gmp-placeautocomplete input:focus {
-      border-color: var(--blue) !important;
-    }
-
-    /* ── Legacy pac-container (fallback) ── */
-    /* Google autocomplete dropdown */
-    .pac-container {
-      background: #1c2128 !important;
-      border: 1px solid var(--border2) !important;
-      border-radius: 8px !important;
-      margin-top: 4px !important;
-      font-family: 'DM Mono', monospace !important;
-      font-size: 12px !important;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.55) !important;
-    }
-    .pac-item {
-      padding: 8px 12px !important;
-      color: var(--muted) !important;
-      border-top: 1px solid var(--border) !important;
-      cursor: pointer !important;
-    }
-    .pac-item:first-child { border-top: none !important; }
-    .pac-item:hover, .pac-item-selected { background: #21262d !important; color: var(--text) !important; }
-    .pac-item-query { color: var(--text) !important; font-size: 12px !important; }
-    .pac-matched { color: var(--blue) !important; font-weight: 600 !important; }
-    .pac-icon, .pac-logo { display: none !important; }
-
-    /* Miles field states */
-    .miles-auto { border-color: var(--green) !important; color: var(--green) !important; }
-    .miles-calculating { border-color: var(--blue) !important; }
-
-    .miles-wrap { position: relative; }
-    .spin-ring {
-      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-      width: 12px; height: 12px;
-      border: 2px solid var(--border2);
-      border-top-color: var(--blue);
-      border-radius: 50%;
-      animation: spin 0.6s linear infinite;
-      display: none;
-    }
-    .miles-wrap.loading .spin-ring { display: block; }
-
-    @keyframes spin { to { transform: translateY(-50%) rotate(360deg); } }
-
-    .miles-hint { font-size: 10px; color: var(--dim); margin-top: 4px; min-height: 14px; }
-    .miles-hint.ok { color: var(--green); }
-    .miles-hint.err { color: var(--red); }
-
-    /* ── Main layout ── */
-    #main { max-width: 1120px; margin: 0 auto; padding: 28px 24px 60px; }
-
-    /* ── Cards ── */
-    #cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
-    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 22px; }
-    .card-label { color: var(--muted); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
-    .card-value { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; line-height: 1; }
-    .card-unit { color: var(--dim); font-size: 11px; margin-top: 4px; }
-
-    /* ── Form ── */
-    #form-wrap {
-      background: var(--surface); border: 1px solid var(--border2);
-      border-radius: 10px; padding: 22px; margin-bottom: 22px;
-      display: none; animation: fadeIn 0.25s ease;
-    }
-    #form-wrap.open { display: block; }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-6px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .form-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; margin-bottom: 16px; }
-    .form-row { display: grid; gap: 12px; margin-bottom: 12px; }
-    .form-row-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
-    .form-row-end { grid-template-columns: 1fr 2fr auto auto; align-items: end; }
-    .field-label { color: var(--muted); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 5px; }
-
-    /* ── Toolbar ── */
-    #toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
-    #toolbar-left { color: var(--muted); font-size: 12px; }
-    #toolbar-right { display: flex; align-items: center; gap: 8px; }
-
-    /* ── Table ── */
-    #table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; min-width: 700px; }
-    thead tr { background: var(--bg); border-bottom: 1px solid var(--border); }
-    th { padding: 10px 14px; text-align: left; color: var(--muted); font-size: 10px; letter-spacing: 0.07em; text-transform: uppercase; font-weight: 500; white-space: nowrap; }
-    th .sort-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 10px; margin-left: 4px; padding: 0 2px; }
-    th .sort-btn:hover { color: var(--text); }
-    tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
-    tbody tr:hover { background: #1c2128; }
-    tbody tr:last-child { border-bottom: none; }
-    td { padding: 11px 14px; font-size: 12px; vertical-align: middle; }
-    .td-muted { color: var(--muted); }
-    .td-blue  { color: var(--blue); font-weight: 500; }
-    .td-green { color: var(--green); font-weight: 600; }
-    .td-dim   { color: var(--dim); font-size: 11px; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .arrow { color: var(--dim); margin: 0 5px; }
-    tfoot tr { background: var(--bg); border-top: 2px solid var(--border); }
-    tfoot td { font-weight: 600; }
-    .empty-row td { padding: 48px; text-align: center; color: var(--dim); }
-
-    .chip { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 500; white-space: nowrap; }
-
-    /* ── Breakdown ── */
-    #breakdown { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 20px; }
-    .breakdown-card { background: var(--surface); border-radius: 8px; padding: 12px 14px; }
-    .breakdown-miles { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; margin-top: 8px; }
-    .breakdown-sub { color: var(--muted); font-size: 10px; margin-top: 3px; }
-
-    /* ── Responsive ── */
-    @media (max-width: 760px) {
-      #cards { grid-template-columns: 1fr 1fr; }
-      .form-row-4 { grid-template-columns: 1fr 1fr; }
-      .form-row-end { grid-template-columns: 1fr 1fr; }
-      #breakdown { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 480px) {
-      #cards { grid-template-columns: 1fr; }
-      #header { padding: 14px 16px; }
-      #main { padding: 18px 14px 48px; }
-      #breakdown { grid-template-columns: 1fr; }
-      .form-row-end { grid-template-columns: 1fr; }
-    }
-  </style>
+@media(max-width:760px){#cards{grid-template-columns:1fr 1fr}.frow4{grid-template-columns:1fr 1fr}.frowend{grid-template-columns:1fr 1fr}#bd{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){#cards{grid-template-columns:1fr}#hdr{padding:14px 16px}#main{padding:18px 14px 48px}#bd{grid-template-columns:1fr}.frowend{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
 
-<!-- ── API Key Modal ── -->
-<div id="api-modal">
-  <div id="api-box">
+<!-- Modal -->
+<div id="modal">
+  <div id="mbox">
     <h2>🗝️ Google Maps API Key</h2>
-    <p>
-      This tracker uses Google Maps to autocomplete addresses and automatically calculate driving distances.<br><br>
-      Paste your API key below. It's saved to your browser's localStorage and never sent anywhere else.<br><br>
-      Need a key? Go to your <a href="https://console.cloud.google.com/apis/dashboard" target="_blank">Google Cloud Console</a> and enable the <strong>Maps JavaScript API</strong>, <strong>Places API</strong>, and <strong>Distance Matrix API</strong>.
-    </p>
-    <input type="text" id="api-key-input" placeholder="AIzaSy..." autocomplete="off" spellcheck="false" />
-    <div id="api-error"></div>
-    <div style="display:flex;gap:10px;">
-      <button class="btn btn-primary" id="api-save-btn">Save &amp; Continue</button>
+    <p>This tracker uses Google Maps for address suggestions and automatic driving distance calculation.<br><br>
+    Paste your API key below — saved to your browser only, never sent elsewhere.<br><br>
+    Need a key? Enable <strong>Maps JavaScript API</strong>, <strong>Places API</strong>, and <strong>Distance Matrix API</strong> in your
+    <a href="https://console.cloud.google.com/apis/dashboard" target="_blank">Google Cloud Console</a>.</p>
+    <input id="kinp" type="text" placeholder="AIzaSy..." autocomplete="off" spellcheck="false"/>
+    <div id="kerr"></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-p" id="ksave">Save &amp; Continue</button>
     </div>
-    <div class="modal-note">
-      <strong>Required APIs:</strong> Maps JavaScript API &middot; Places API &middot; Distance Matrix API<br>
-      Your key is stored in <code>localStorage</code> on this device only. Click the "Maps connected" badge in the header to update it anytime.
-    </div>
+    <div class="mnote"><strong>Required:</strong> Maps JavaScript API · Places API · Distance Matrix API<br>
+    Stored in localStorage on this device only. Click the "Maps connected" badge to update anytime.</div>
   </div>
 </div>
 
-<!-- ── Header ── -->
-<div id="header">
+<!-- Header -->
+<div id="hdr">
   <div>
     <h1>⛽ Mileage Tracker</h1>
-    <div class="sub" id="header-sub">City Networks · 2026 reimbursement log</div>
+    <div class="sub" id="hsub">City Networks · 2026 reimbursement log</div>
   </div>
-  <div id="header-right">
-    <div id="key-badge" title="Update API key">
-      <span class="dot"></span>
-      <span>Maps connected</span>
-    </div>
-    <span style="color:var(--muted);font-size:12px;">$/mi</span>
-    <input type="number" class="inp rate-inp" id="rate-input" value="0.67" step="0.01" min="0" />
-    <button class="btn btn-ghost" id="export-btn">↓ Export CSV</button>
-    <button class="btn btn-primary" id="add-btn">+ Add Trip</button>
+  <div id="hdr-r">
+    <div id="kbadge"><span class="dot"></span><span>Maps connected</span></div>
+    <span style="color:var(--mu);font-size:12px">$/mi</span>
+    <input type="number" class="inp" id="rate" value="0.67" step="0.01" min="0" style="width:72px;text-align:center"/>
+    <button class="btn btn-g" id="expbtn">↓ Export CSV</button>
+    <button class="btn btn-p" id="addbtn">+ Add Trip</button>
   </div>
 </div>
 
-<!-- ── Main ── -->
+<!-- Main -->
 <div id="main">
 
+  <!-- Cards -->
   <div id="cards">
-    <div class="card">
-      <div class="card-label">Total Miles</div>
-      <div class="card-value" id="stat-miles" style="color:var(--blue)">0.0</div>
-      <div class="card-unit">mi</div>
-    </div>
-    <div class="card">
-      <div class="card-label">Reimbursement</div>
-      <div class="card-value" id="stat-reimb" style="color:var(--green)">$0.00</div>
-      <div class="card-unit" id="stat-reimb-unit">all time</div>
-    </div>
-    <div class="card">
-      <div class="card-label">Trips Logged</div>
-      <div class="card-value" id="stat-trips" style="color:var(--purple)">0</div>
-      <div class="card-unit">entries</div>
-    </div>
+    <div class="card"><div class="clbl">Total Miles</div><div class="cval" id="smi" style="color:var(--bl)">0.0</div><div class="cunit">mi</div></div>
+    <div class="card"><div class="clbl">Reimbursement</div><div class="cval" id="srb" style="color:var(--gr)">$0.00</div><div class="cunit" id="srbu">all time</div></div>
+    <div class="card"><div class="clbl">Trips Logged</div><div class="cval" id="str" style="color:var(--pu)">0</div><div class="cunit">entries</div></div>
   </div>
 
   <!-- Form -->
-  <div id="form-wrap">
-    <div class="form-title" id="form-title">➕ New Trip</div>
-    <div class="form-row form-row-4">
+  <div id="fwrap">
+    <div class="ftitle" id="ftitle">➕ New Trip</div>
+    <div class="frow frow4">
       <div>
-        <div class="field-label">Date</div>
-        <input type="date" class="inp" id="f-date" />
+        <div class="flbl">Date</div>
+        <input type="date" class="inp" id="fdate"/>
       </div>
       <div>
-        <div class="field-label">From</div>
-        <input type="text" class="inp" id="f-from" placeholder="Start typing an address..." autocomplete="new-password" spellcheck="false" />
-      </div>
-      <div>
-        <div class="field-label">To</div>
-        <input type="text" class="inp" id="f-to" placeholder="Start typing an address..." autocomplete="new-password" spellcheck="false" />
-      </div>
-      <div>
-        <div class="field-label">Miles <span style="color:var(--dim);font-size:9px;letter-spacing:0;">(auto)</span></div>
-        <div class="miles-wrap" id="miles-wrap">
-          <input type="number" class="inp" id="f-miles" placeholder="Auto-calculated" step="0.1" min="0" />
-          <div class="spin-ring"></div>
+        <div class="flbl">From</div>
+        <div class="ac-wrap" id="from-wrap">
+          <input type="text" class="inp" id="ffrom" placeholder="Start typing..." autocomplete="off" spellcheck="false"/>
+          <div class="ac-list" id="from-list"></div>
         </div>
-        <div class="miles-hint" id="miles-hint">Select both addresses to auto-fill</div>
+      </div>
+      <div>
+        <div class="flbl">To</div>
+        <div class="ac-wrap" id="to-wrap">
+          <input type="text" class="inp" id="fto" placeholder="Start typing..." autocomplete="off" spellcheck="false"/>
+          <div class="ac-list" id="to-list"></div>
+        </div>
+      </div>
+      <div>
+        <div class="flbl">Miles <span style="color:var(--di);font-size:9px">(auto)</span></div>
+        <div class="miles-wrap" id="mwrap">
+          <input type="number" class="inp" id="fmiles" placeholder="Auto-calculated" step="0.1" min="0"/>
+          <div class="spin"></div>
+        </div>
+        <div class="mhint" id="mhint">Select both addresses to auto-fill</div>
       </div>
     </div>
-    <div class="form-row form-row-end">
+    <div class="frow frowend">
       <div>
-        <div class="field-label">Purpose</div>
-        <select class="inp" id="f-purpose">
+        <div class="flbl">Purpose</div>
+        <select class="inp" id="fpurp">
           <option>Client Meeting</option>
           <option>Site Visit</option>
           <option>Conference</option>
@@ -415,451 +217,401 @@
         </select>
       </div>
       <div>
-        <div class="field-label">Notes</div>
-        <input type="text" class="inp" id="f-notes" placeholder="Venue, account, context..." />
+        <div class="flbl">Notes</div>
+        <input type="text" class="inp" id="fnotes" placeholder="Venue, account, context..."/>
       </div>
-      <button class="btn btn-primary" id="submit-btn" style="height:36px;">Add</button>
-      <button class="btn btn-ghost" id="cancel-btn" style="height:36px;">Cancel</button>
+      <button class="btn btn-p" id="subbtn" style="height:36px">Add</button>
+      <button class="btn btn-g" id="canbtn" style="height:36px">Cancel</button>
     </div>
   </div>
 
   <!-- Toolbar -->
-  <div id="toolbar">
-    <div id="toolbar-left"></div>
-    <div id="toolbar-right">
-      <span style="color:var(--muted);font-size:12px;">Filter month:</span>
-      <input type="month" class="inp" id="filter-month" style="width:150px;" />
-      <button class="btn btn-ghost" id="clear-filter-btn" style="display:none;padding:6px 10px;font-size:11px;">Clear</button>
+  <div id="tb">
+    <div id="tbl"></div>
+    <div id="tbr">
+      <span style="color:var(--mu);font-size:12px">Filter month:</span>
+      <input type="month" class="inp" id="fmonth" style="width:150px"/>
+      <button class="btn btn-g" id="clrbtn" style="display:none;padding:6px 10px;font-size:11px">Clear</button>
     </div>
   </div>
 
   <!-- Table -->
-  <div id="table-wrap">
+  <div id="twrap">
     <table>
-      <thead>
-        <tr>
-          <th>Date <button class="sort-btn" data-key="date">↕</button></th>
-          <th>From → To</th>
-          <th>Miles <button class="sort-btn" data-key="miles">↕</button></th>
-          <th>Purpose</th>
-          <th>Notes</th>
-          <th>Amount</th>
-          <th></th>
-        </tr>
-      </thead>
+      <thead><tr>
+        <th>Date <button class="sb" data-k="date">↕</button></th>
+        <th>From → To</th>
+        <th>Miles <button class="sb" data-k="miles">↕</button></th>
+        <th>Purpose</th>
+        <th>Notes</th>
+        <th>Amount</th>
+        <th></th>
+      </tr></thead>
       <tbody id="tbody"></tbody>
       <tfoot id="tfoot"></tfoot>
     </table>
   </div>
 
-  <div id="breakdown"></div>
+  <div id="bd"></div>
 </div>
 
 <script>
-// ── Constants ──
-const PURPOSE_COLORS = {
-  "Client Meeting": "#3b82f6",
-  "Site Visit":     "#10b981",
-  "Conference":     "#8b5cf6",
-  "Training":       "#f59e0b",
-  "Other":          "#6b7280",
-};
-const PURPOSES    = Object.keys(PURPOSE_COLORS);
-const STORAGE_KEY = "cn_mileage_v1";
-const API_KEY_KEY = "cn_gmaps_key";
+// ── Config ──
+const PC = {"Client Meeting":"#3b82f6","Site Visit":"#10b981","Conference":"#8b5cf6","Training":"#f59e0b","Other":"#6b7280"};
+const PURPOSES = Object.keys(PC);
+const SK = "cn_mileage_v2";
+const AK = "cn_gmaps_key";
 
 // ── State ──
-let trips        = [];
-let rate         = 0.67;
-let editId       = null;
-let filterMonth  = "";
-let sortKey      = "date";
-let sortDir      = "desc";
-let gmapsReady   = false;
-let fromSelected = false;
-let toSelected   = false;
+let trips=[], rate=0.67, editId=null, filterMonth="", sortKey="date", sortDir="desc";
+let mapsReady=false;
+let acSvc=null, fromPlaceId=null, toPlaceId=null, fromAddr="", toAddr="";
 
 // ── Utils ──
-const $       = id => document.getElementById(id);
-const fmt$    = n  => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
-const fmtDate = d  => new Date(d + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-const todayStr = () => new Date().toISOString().split("T")[0];
-const uid      = () => Date.now() + Math.random();
-const escHtml  = s  => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const $=id=>document.getElementById(id);
+const fmt$=n=>new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(n);
+const fmtD=d=>new Date(d+"T00:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+const today=()=>new Date().toISOString().split("T")[0];
+const uid=()=>Date.now()+Math.random();
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 
 // ── Persistence ──
-function save() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ trips, rate })); } catch(e) {}
-}
-function load() {
-  try {
-    const d = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-    if (Array.isArray(d.trips)) trips = d.trips;
-    if (d.rate) rate = +d.rate;
-  } catch(e) {}
-  if (!trips.length) {
-    trips = [
-      { id: 1, date: "2026-04-01", from: "Hollywood, CA", to: "Downtown Los Angeles, CA", miles: 14.2, purpose: "Client Meeting", notes: "Hyatt venue walkthrough" },
-      { id: 2, date: "2026-04-03", from: "LAX, Los Angeles, CA", to: "Santa Monica, CA", miles: 18.5, purpose: "Site Visit", notes: "Buffalo Wild Wings install check" },
-    ];
-  }
+function save(){try{localStorage.setItem(SK,JSON.stringify({trips,rate}))}catch(e){}}
+function load(){
+  try{const d=JSON.parse(localStorage.getItem(SK)||"{}");if(Array.isArray(d.trips))trips=d.trips;if(d.rate)rate=+d.rate}catch(e){}
+  if(!trips.length) trips=[
+    {id:1,date:"2026-04-01",from:"Hollywood, CA",to:"Downtown Los Angeles, CA",miles:14.2,purpose:"Client Meeting",notes:"Hyatt venue walkthrough"},
+    {id:2,date:"2026-04-03",from:"LAX, Los Angeles, CA",to:"Santa Monica, CA",miles:18.5,purpose:"Site Visit",notes:"Buffalo Wild Wings install check"},
+  ];
 }
 
 // ── API Key ──
-const getSavedKey = () => localStorage.getItem(API_KEY_KEY) || "";
-const saveKey     = k  => localStorage.setItem(API_KEY_KEY, k);
-
-function showModal(msg) {
-  $("api-modal").classList.remove("hidden");
-  $("api-key-input").value = getSavedKey();
-  const err = $("api-error");
-  if (msg) { err.textContent = msg; err.style.display = "block"; }
-  else err.style.display = "none";
-  setTimeout(() => $("api-key-input").focus(), 100);
+const getKey=()=>localStorage.getItem(AK)||"";
+const setKey=k=>localStorage.setItem(AK,k);
+function showModal(msg){
+  $("modal").classList.remove("hide");
+  $("kinp").value=getKey();
+  const e=$("kerr");
+  if(msg){e.textContent=msg;e.style.display="block"}else e.style.display="none";
+  setTimeout(()=>$("kinp").focus(),100);
 }
-const hideModal = () => $("api-modal").classList.add("hidden");
+const hideModal=()=>$("modal").classList.add("hide");
 
-function tryLoadKey() {
-  const key = $("api-key-input").value.trim();
-  const err = $("api-error");
-  if (!key || !key.startsWith("AIza")) {
-    err.textContent = 'Key should start with "AIza". Check your Google Cloud Console.';
-    err.style.display = "block";
-    return;
-  }
-  saveKey(key);
-  err.style.display = "none";
-  hideModal();
-  loadGoogleMaps(key);
+function trySave(){
+  const k=$("kinp").value.trim();
+  if(!k||!k.startsWith("AIza")){$("kerr").textContent='Key must start with "AIza"';$("kerr").style.display="block";return}
+  setKey(k);$("kerr").style.display="none";hideModal();loadMaps(k);
 }
+$("ksave").onclick=trySave;
+$("kinp").onkeydown=e=>{if(e.key==="Enter")trySave()};
+$("kbadge").onclick=()=>showModal();
 
-$("api-save-btn").addEventListener("click", tryLoadKey);
-$("api-key-input").addEventListener("keydown", e => { if (e.key === "Enter") tryLoadKey(); });
-$("key-badge").addEventListener("click", () => showModal());
-
-// ── Google Maps ──
-function loadGoogleMaps(key) {
-  // Remove any old script
-  const old = document.querySelector("script[data-gmaps]");
-  if (old) old.remove();
-  const s = document.createElement("script");
-  s.dataset.gmaps = "1";
-  s.async = true;
-  s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&libraries=places&v=3&callback=_gmapsLoaded`;
-  s.onerror = () => showModal("Failed to load Google Maps. Check that your key is valid and the APIs are enabled in Google Cloud Console.");
+// ── Load Maps ──
+function loadMaps(key){
+  const old=document.querySelector("script[data-gm]");
+  if(old)old.remove();
+  const s=document.createElement("script");
+  s.dataset.gm="1";
+  s.async=true;
+  // Load with Places library, legacy version
+  s.src=`https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&libraries=places&callback=_mapsReady`;
+  s.onerror=()=>showModal("Failed to load Google Maps. Verify your key and that Maps JavaScript API is enabled.");
   document.head.appendChild(s);
 }
 
-window._gmapsLoaded = function() {
-  gmapsReady = true;
-  // If form is already open, bind immediately
-  if ($("form-wrap").classList.contains("open")) bindAutocomplete();
+window._mapsReady=function(){
+  mapsReady=true;
+  // Build AutocompleteService (does NOT require a map div)
+  acSvc=new google.maps.places.AutocompleteService();
+  console.log("Maps ready, AutocompleteService created");
+  setupAC("ffrom","from-list",true);
+  setupAC("fto","to-list",false);
 };
 
-// Store resolved addresses for distance calc
-let fromAddr = "";
-let toAddr   = "";
-let acFromInst = null;
-let acToInst   = null;
+// ── Custom Autocomplete using AutocompleteService ──
+function setupAC(inputId, listId, isFrom){
+  const inp=$( inputId);
+  const list=$(listId);
+  let debounce=null;
 
-function bindAutocomplete() {
-  if (!gmapsReady) return;
-
-  const fromEl = $("f-from");
-  const toEl   = $("f-to");
-
-  // Re-create instances on each form open (legacy Autocomplete, hits Places API v1 which has 0% errors)
-  acFromInst = new google.maps.places.Autocomplete(fromEl, {
-    fields: ["formatted_address", "name"],
-  });
-  acToInst = new google.maps.places.Autocomplete(toEl, {
-    fields: ["formatted_address", "name"],
+  inp.addEventListener("input",()=>{
+    const val=inp.value.trim();
+    if(!val||val.length<2){list.classList.remove("open");list.innerHTML="";return}
+    clearTimeout(debounce);
+    debounce=setTimeout(()=>fetchSuggestions(val,list,inp,isFrom),250);
+    // Reset selection when user types
+    if(isFrom){fromPlaceId=null;fromAddr="";}
+    else{toPlaceId=null;toAddr="";}
+    resetMiles();
   });
 
-  acFromInst.addListener("place_changed", () => {
-    const p = acFromInst.getPlace();
-    fromAddr = p.formatted_address || p.name || fromEl.value;
-    $("f-from").value = fromAddr;
-    fromSelected = true;
-    maybeCalcDistance();
+  inp.addEventListener("blur",()=>{
+    // Delay so click on item registers first
+    setTimeout(()=>list.classList.remove("open"),200);
   });
 
-  acToInst.addListener("place_changed", () => {
-    const p = acToInst.getPlace();
-    toAddr = p.formatted_address || p.name || toEl.value;
-    $("f-to").value = toAddr;
-    toSelected = true;
-    maybeCalcDistance();
+  inp.addEventListener("keydown",e=>{
+    const items=list.querySelectorAll(".ac-item");
+    const sel=list.querySelector(".ac-item.sel");
+    if(e.key==="ArrowDown"){
+      e.preventDefault();
+      const next=sel?sel.nextElementSibling:items[0];
+      if(next){sel&&sel.classList.remove("sel");next.classList.add("sel")}
+    }else if(e.key==="ArrowUp"){
+      e.preventDefault();
+      const prev=sel?sel.previousElementSibling:items[items.length-1];
+      if(prev){sel&&sel.classList.remove("sel");prev.classList.add("sel")}
+    }else if(e.key==="Enter"){
+      e.preventDefault();
+      if(sel)sel.click();
+    }else if(e.key==="Escape"){
+      list.classList.remove("open");
+    }
   });
-
-  fromEl.oninput = () => { fromSelected = false; fromAddr = ""; resetMiles(); };
-  toEl.oninput   = () => { toSelected   = false; toAddr   = ""; resetMiles(); };
 }
 
-function setMilesHint(text, cls) {
-  const h = $("miles-hint");
-  h.textContent = text;
-  h.className = "miles-hint" + (cls ? " " + cls : "");
-}
+function fetchSuggestions(query,list,inp,isFrom){
+  if(!acSvc)return;
+  list.innerHTML=`<div class="ac-loading">Searching...</div>`;
+  list.classList.add("open");
 
-function resetMiles() {
-  const inp = $("f-miles");
-  inp.readOnly = false;
-  inp.classList.remove("miles-auto", "miles-calculating");
-  $("miles-wrap").classList.remove("loading");
-  setMilesHint("Select both addresses to auto-fill");
-}
-
-function maybeCalcDistance() {
-  if (!fromSelected || !toSelected) return;
-  const origin = fromAddr || $("f-from").value.trim();
-  const dest   = toAddr   || $("f-to").value.trim();
-  if (!origin || !dest) return;
-
-  // Loading state
-  const inp = $("f-miles");
-  inp.value = "";
-  inp.readOnly = true;
-  inp.classList.remove("miles-auto");
-  inp.classList.add("miles-calculating");
-  $("miles-wrap").classList.add("loading");
-  setMilesHint("Calculating driving distance...");
-
-  new google.maps.DistanceMatrixService().getDistanceMatrix(
-    { origins: [origin], destinations: [dest], travelMode: google.maps.TravelMode.DRIVING, unitSystem: google.maps.UnitSystem.IMPERIAL },
-    (res, status) => {
-      $("miles-wrap").classList.remove("loading");
-      inp.readOnly = false;
-      inp.classList.remove("miles-calculating");
-
-      if (status === "OK" && res.rows[0].elements[0].status === "OK") {
-        const el    = res.rows[0].elements[0];
-        const miles = Math.round(el.distance.value / 1609.344 * 10) / 10;
-        inp.value   = miles;
-        inp.classList.add("miles-auto");
-        setMilesHint(`✓ ${el.duration.text} drive · ${el.distance.text}`, "ok");
-      } else {
-        setMilesHint("Could not calculate distance — enter miles manually.", "err");
-        inp.value = "";
+  acSvc.getPlacePredictions(
+    {input:query, types:["geocode","establishment"]},
+    (predictions,status)=>{
+      list.innerHTML="";
+      if(status!==google.maps.places.PlacesServiceStatus.OK||!predictions||!predictions.length){
+        list.innerHTML=`<div class="ac-loading">No results</div>`;
+        return;
       }
+      predictions.slice(0,5).forEach(pred=>{
+        const item=document.createElement("div");
+        item.className="ac-item";
+        const main=pred.structured_formatting?.main_text||pred.description;
+        const sec=pred.structured_formatting?.secondary_text||"";
+        item.innerHTML=`<strong>${esc(main)}</strong>${sec?`<br><span style="font-size:10px;color:var(--di)">${esc(sec)}</span>`:""}`;
+        item.addEventListener("mousedown",e=>{
+          e.preventDefault();
+          inp.value=pred.description;
+          list.classList.remove("open");
+          if(isFrom){fromAddr=pred.description;fromPlaceId=pred.place_id;}
+          else{toAddr=pred.description;toPlaceId=pred.place_id;}
+          checkAndCalc();
+        });
+        list.appendChild(item);
+      });
     }
   );
 }
 
+// ── Distance Calculation ──
+function checkAndCalc(){
+  if(!fromAddr||!toAddr)return;
+  console.log("Calculating distance:",fromAddr,"→",toAddr);
+
+  const inp=$("fmiles");
+  inp.value="";
+  inp.classList.remove("ok");
+  $("mwrap").classList.add("loading");
+  setHint("Calculating driving distance...");
+
+  const svc=new google.maps.DistanceMatrixService();
+  svc.getDistanceMatrix({
+    origins:[fromAddr],
+    destinations:[toAddr],
+    travelMode:google.maps.TravelMode.DRIVING,
+    unitSystem:google.maps.UnitSystem.IMPERIAL,
+  },(res,status)=>{
+    $("mwrap").classList.remove("loading");
+    console.log("Distance Matrix response:",status,res);
+    if(status==="OK"&&res.rows[0].elements[0].status==="OK"){
+      const el=res.rows[0].elements[0];
+      const miles=Math.round(el.distance.value/1609.344*10)/10;
+      inp.value=miles;
+      inp.classList.add("ok");
+      setHint(`✓ ${el.duration.text} drive · ${el.distance.text}`,"ok");
+    }else{
+      setHint("Could not calculate — enter miles manually.","err");
+      console.warn("Distance Matrix error:",status,res?.rows?.[0]?.elements?.[0]?.status);
+    }
+  });
+}
+
+function resetMiles(){
+  const inp=$("fmiles");
+  inp.value="";inp.classList.remove("ok");
+  $("mwrap").classList.remove("loading");
+  setHint("Select both addresses to auto-fill");
+}
+
+function setHint(txt,cls){
+  const h=$("mhint");h.textContent=txt;
+  h.className="mhint"+(cls?" "+cls:"");
+}
+
 // ── Render ──
-function getFiltered() {
-  let t = trips.filter(r => filterMonth ? r.date.startsWith(filterMonth) : true);
-  t.sort((a, b) => {
-    let av = a[sortKey], bv = b[sortKey];
-    if (sortKey === "miles") { av = +av; bv = +bv; }
-    if (av < bv) return sortDir === "asc" ? -1 : 1;
-    if (av > bv) return sortDir === "asc" ? 1 : -1;
-    return 0;
+function filtered(){
+  let t=trips.filter(r=>filterMonth?r.date.startsWith(filterMonth):true);
+  t.sort((a,b)=>{
+    let av=a[sortKey],bv=b[sortKey];
+    if(sortKey==="miles"){av=+av;bv=+bv}
+    return av<bv?(sortDir==="asc"?-1:1):av>bv?(sortDir==="asc"?1:-1):0;
   });
   return t;
 }
 
-function render() {
-  const f          = getFiltered();
-  const totalMiles = f.reduce((s, r) => s + +r.miles, 0);
-  const totalReimb = totalMiles * rate;
+function render(){
+  const f=filtered();
+  const tm=f.reduce((s,r)=>s+ +r.miles,0);
+  const tr2=tm*rate;
+  $("smi").textContent=tm.toFixed(1);
+  $("srb").textContent=fmt$(tr2);
+  $("str").textContent=f.length;
+  $("srbu").textContent=filterMonth?"this month":"all time";
+  $("hsub").textContent=`City Networks · $${rate}/mi · ${new Date().getFullYear()} reimbursement log`;
+  $("clrbtn").style.display=filterMonth?"inline-block":"none";
+  $("tbl").textContent=`${f.length} trip${f.length!==1?"s":""} · ${tm.toFixed(1)} mi · ${fmt$(tr2)}`;
 
-  $("stat-miles").textContent      = totalMiles.toFixed(1);
-  $("stat-reimb").textContent      = fmt$(totalReimb);
-  $("stat-trips").textContent      = f.length;
-  $("stat-reimb-unit").textContent = filterMonth ? "this month" : "all time";
-  $("header-sub").textContent      = `City Networks · $${rate}/mi · ${new Date().getFullYear()} reimbursement log`;
-  $("clear-filter-btn").style.display = filterMonth ? "inline-block" : "none";
-  $("toolbar-left").textContent    = `${f.length} trip${f.length !== 1 ? "s" : ""} · ${totalMiles.toFixed(1)} mi · ${fmt$(totalReimb)}`;
-
-  document.querySelectorAll(".sort-btn").forEach(btn => {
-    const k = btn.dataset.key;
-    btn.textContent = sortKey === k ? (sortDir === "asc" ? "↑" : "↓") : "↕";
+  document.querySelectorAll(".sb").forEach(b=>{
+    const k=b.dataset.k;
+    b.textContent=sortKey===k?(sortDir==="asc"?"↑":"↓"):"↕";
   });
 
-  // Body
-  const tbody = $("tbody");
-  tbody.innerHTML = "";
-  if (!f.length) {
-    tbody.innerHTML = `<tr class="empty-row"><td colspan="7">No trips yet. Add your first trip above.</td></tr>`;
-  } else {
-    f.forEach(trip => {
-      const c  = PURPOSE_COLORS[trip.purpose] || "#6b7280";
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td class="td-muted">${fmtDate(trip.date)}</td>
-        <td>${escHtml(trip.from)}<span class="arrow">→</span>${escHtml(trip.to)}</td>
-        <td class="td-blue">${(+trip.miles).toFixed(1)}</td>
-        <td><span class="chip" style="background:${c}22;color:${c}">${escHtml(trip.purpose)}</span></td>
-        <td class="td-dim" title="${escHtml(trip.notes||"")}">${escHtml(trip.notes||"—")}</td>
-        <td class="td-green">${fmt$(+trip.miles * rate)}</td>
-        <td><div style="display:flex;gap:6px;">
-          <button class="btn btn-edit" onclick="startEdit(${trip.id})">Edit</button>
-          <button class="btn btn-danger" onclick="deleteTrip(${trip.id})">✕</button>
+  const tbody=$("tbody");tbody.innerHTML="";
+  if(!f.length){
+    tbody.innerHTML=`<tr class="erow"><td colspan="7">No trips yet. Add your first trip above.</td></tr>`;
+  }else{
+    f.forEach(trip=>{
+      const c=PC[trip.purpose]||"#6b7280";
+      const tr=document.createElement("tr");
+      tr.innerHTML=`
+        <td class="tmu">${fmtD(trip.date)}</td>
+        <td>${esc(trip.from)}<span class="arr">→</span>${esc(trip.to)}</td>
+        <td class="tbl">${(+trip.miles).toFixed(1)}</td>
+        <td><span class="chip" style="background:${c}22;color:${c}">${esc(trip.purpose)}</span></td>
+        <td class="tdi" title="${esc(trip.notes||"")}">${esc(trip.notes||"—")}</td>
+        <td class="tgr">${fmt$(+trip.miles*rate)}</td>
+        <td><div style="display:flex;gap:6px">
+          <button class="btn btn-e" onclick="doEdit(${trip.id})">Edit</button>
+          <button class="btn btn-d" onclick="doDel(${trip.id})">✕</button>
         </div></td>`;
       tbody.appendChild(tr);
     });
   }
 
-  // Footer
-  $("tfoot").innerHTML = f.length ? `
-    <tr>
-      <td colspan="2" class="td-muted" style="font-size:11px;">TOTAL · ${f.length} trips</td>
-      <td class="td-blue" style="font-size:14px;">${totalMiles.toFixed(1)}</td>
-      <td colspan="2"></td>
-      <td class="td-green" style="font-size:15px;">${fmt$(totalReimb)}</td>
-      <td></td>
-    </tr>` : "";
+  $("tfoot").innerHTML=f.length?`<tr>
+    <td colspan="2" class="tmu" style="font-size:11px">TOTAL · ${f.length} trips</td>
+    <td class="tbl" style="font-size:14px">${tm.toFixed(1)}</td>
+    <td colspan="2"></td>
+    <td class="tgr" style="font-size:15px">${fmt$(tr2)}</td>
+    <td></td>
+  </tr>`:"";
 
-  // Breakdown
-  const bd = $("breakdown");
-  bd.innerHTML = "";
-  if (f.length) {
-    PURPOSES.forEach(p => {
-      const pt = f.filter(t => t.purpose === p);
-      if (!pt.length) return;
-      const pm  = pt.reduce((s, t) => s + +t.miles, 0);
-      const c   = PURPOSE_COLORS[p];
-      const div = document.createElement("div");
-      div.className = "breakdown-card";
-      div.style.border = `1px solid ${c}33`;
-      div.innerHTML = `
-        <span class="chip" style="background:${c}22;color:${c}">${p}</span>
-        <div class="breakdown-miles">${pm.toFixed(1)} mi</div>
-        <div class="breakdown-sub">${fmt$(pm * rate)} · ${pt.length} trip${pt.length !== 1 ? "s" : ""}</div>`;
-      bd.appendChild(div);
+  const bdiv=$("bd");bdiv.innerHTML="";
+  if(f.length){
+    PURPOSES.forEach(p=>{
+      const pt=f.filter(t=>t.purpose===p);if(!pt.length)return;
+      const pm=pt.reduce((s,t)=>s+ +t.miles,0);
+      const c=PC[p];const d=document.createElement("div");
+      d.className="bcard";d.style.border=`1px solid ${c}33`;
+      d.innerHTML=`<span class="chip" style="background:${c}22;color:${c}">${p}</span>
+        <div class="bmi">${pm.toFixed(1)} mi</div>
+        <div class="bsub">${fmt$(pm*rate)} · ${pt.length} trip${pt.length!==1?"s":""}</div>`;
+      bdiv.appendChild(d);
     });
   }
 }
 
 // ── Form ──
-function openForm(isEdit) {
-  $("form-wrap").classList.add("open");
-  $("form-title").textContent = isEdit ? "✏️ Edit Trip" : "➕ New Trip";
-  $("submit-btn").textContent = isEdit ? "Save" : "Add";
-  $("add-btn").textContent    = "− Close";
-  // Rebind autocomplete each time the fields become visible
-  bindAutocomplete();
+function openForm(isEdit){
+  $("fwrap").classList.add("open");
+  $("ftitle").textContent=isEdit?"✏️ Edit Trip":"➕ New Trip";
+  $("subbtn").textContent=isEdit?"Save":"Add";
+  $("addbtn").textContent="− Close";
 }
-
-function closeForm() {
-  $("form-wrap").classList.remove("open");
-  $("add-btn").textContent = "+ Add Trip";
-  editId = null;
-  resetFormFields();
+function closeForm(){
+  $("fwrap").classList.remove("open");
+  $("addbtn").textContent="+ Add Trip";
+  editId=null;clearForm();
 }
-
-function resetFormFields() {
-  $("f-date").value    = todayStr();
-  $("f-from").value    = "";
-  $("f-to").value      = "";
-  $("f-miles").value   = "";
-  $("f-purpose").value = "Client Meeting";
-  $("f-notes").value   = "";
-  fromSelected = false;
-  toSelected   = false;
-  fromAddr     = "";
-  toAddr       = "";
+function clearForm(){
+  $("fdate").value=today();
+  $("ffrom").value="";$("fto").value="";$("fmiles").value="";
+  $("fpurp").value="Client Meeting";$("fnotes").value="";
+  fromAddr="";toAddr="";fromPlaceId=null;toPlaceId=null;
+  $("fmiles").classList.remove("ok");
   resetMiles();
+  $("from-list").classList.remove("open");$("from-list").innerHTML="";
+  $("to-list").classList.remove("open");$("to-list").innerHTML="";
 }
 
-function submitForm() {
-  const date  = $("f-date").value.trim();
-  const from  = $("f-from").value.trim();
-  const to    = $("f-to").value.trim();
-  const miles = parseFloat($("f-miles").value);
-  const valid = date && from && to && !isNaN(miles) && miles > 0;
-
-  $("f-date").style.borderColor  = date  ? "" : "var(--red)";
-  $("f-from").style.borderColor  = from  ? "" : "var(--red)";
-  $("f-to").style.borderColor    = to    ? "" : "var(--red)";
-  $("f-miles").style.borderColor = (!isNaN(miles) && miles > 0) ? "" : "var(--red)";
-
-  if (!valid) return;
-  ["f-date","f-from","f-to","f-miles"].forEach(id => $(id).style.borderColor = "");
-
-  const entry = { date, from, to, miles, purpose: $("f-purpose").value, notes: $("f-notes").value.trim() };
-  if (editId !== null) {
-    trips = trips.map(t => t.id === editId ? { ...entry, id: editId } : t);
-    editId = null;
-  } else {
-    trips.push({ ...entry, id: uid() });
-  }
-  save(); closeForm(); render();
+function doSubmit(){
+  const date=$("fdate").value.trim();
+  const from=$("ffrom").value.trim();
+  const to=$("fto").value.trim();
+  const miles=parseFloat($("fmiles").value);
+  const ok=date&&from&&to&&!isNaN(miles)&&miles>0;
+  $("fdate").style.borderColor=date?"":"var(--re)";
+  $("ffrom").style.borderColor=from?"":"var(--re)";
+  $("fto").style.borderColor=to?"":"var(--re)";
+  $("fmiles").style.borderColor=(!isNaN(miles)&&miles>0)?"":"var(--re)";
+  if(!ok)return;
+  ["fdate","ffrom","fto","fmiles"].forEach(id=>$(id).style.borderColor="");
+  const entry={date,from,to,miles,purpose:$("fpurp").value,notes:$("fnotes").value.trim()};
+  if(editId!==null){trips=trips.map(t=>t.id===editId?{...entry,id:editId}:t);editId=null;}
+  else trips.push({...entry,id:uid()});
+  save();closeForm();render();
 }
 
-function startEdit(id) {
-  const trip = trips.find(t => t.id === id);
-  if (!trip) return;
-  editId = id;
-  $("f-date").value    = trip.date;
-  $("f-from").value    = trip.from;
-  $("f-to").value      = trip.to;
-  $("f-miles").value   = trip.miles;
-  $("f-purpose").value = trip.purpose;
-  $("f-notes").value   = trip.notes || "";
-  fromSelected = false; toSelected = false;
-  resetMiles();
-  setMilesHint("Re-select addresses to recalculate, or edit miles directly");
-  openForm(true);
+function doEdit(id){
+  const trip=trips.find(t=>t.id===id);if(!trip)return;
+  editId=id;
+  $("fdate").value=trip.date;
+  $("ffrom").value=trip.from;fromAddr=trip.from;
+  $("fto").value=trip.to;toAddr=trip.to;
+  $("fmiles").value=trip.miles;
+  $("fpurp").value=trip.purpose;
+  $("fnotes").value=trip.notes||"";
+  $("mhint").textContent="Re-select addresses to recalculate, or edit miles directly";
+  openForm(true);$("ffrom").focus();
 }
 
-function deleteTrip(id) {
-  if (!confirm("Delete this trip?")) return;
-  trips = trips.filter(t => t.id !== id);
-  save(); render();
+function doDel(id){
+  if(!confirm("Delete this trip?"))return;
+  trips=trips.filter(t=>t.id!==id);save();render();
 }
-
-// ── Export ──
-$("export-btn").addEventListener("click", () => {
-  const f    = getFiltered();
-  const blob = new Blob(
-    ["Date,From,To,Miles,Purpose,Notes,Reimbursement\n" +
-     f.map(r => `${r.date},"${r.from}","${r.to}",${r.miles},"${r.purpose}","${r.notes||""}",${(+r.miles*rate).toFixed(2)}`).join("\n")],
-    { type: "text/csv" }
-  );
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = `mileage-${filterMonth||new Date().getFullYear()}.csv`;
-  a.click();
-});
 
 // ── Events ──
-$("add-btn").addEventListener("click", () => {
-  if ($("form-wrap").classList.contains("open") && !editId) closeForm();
-  else if (!$("form-wrap").classList.contains("open")) { resetFormFields(); openForm(false); $("f-from").focus(); }
+$("addbtn").onclick=()=>{
+  if($("fwrap").classList.contains("open")&&!editId)closeForm();
+  else if(!$("fwrap").classList.contains("open")){clearForm();openForm(false);$("ffrom").focus();}
+};
+$("canbtn").onclick=closeForm;
+$("subbtn").onclick=doSubmit;
+$("expbtn").onclick=()=>{
+  const f=filtered();
+  const rows=f.map(r=>`${r.date},"${r.from}","${r.to}",${r.miles},"${r.purpose}","${r.notes||""}",${(+r.miles*rate).toFixed(2)}`);
+  const blob=new Blob(["Date,From,To,Miles,Purpose,Notes,Reimbursement\n"+rows.join("\n")],{type:"text/csv"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download=`mileage-${filterMonth||new Date().getFullYear()}.csv`;a.click();
+};
+$("rate").oninput=e=>{const v=parseFloat(e.target.value);if(!isNaN(v)&&v>0){rate=v;save();render()}};
+$("fmonth").onchange=e=>{filterMonth=e.target.value;render()};
+$("clrbtn").onclick=()=>{filterMonth="";$("fmonth").value="";render()};
+document.querySelectorAll(".sb").forEach(b=>b.onclick=()=>{
+  const k=b.dataset.k;
+  if(sortKey===k)sortDir=sortDir==="asc"?"desc":"asc";
+  else{sortKey=k;sortDir="asc"}
+  render();
 });
-
-$("cancel-btn").addEventListener("click", closeForm);
-$("submit-btn").addEventListener("click", submitForm);
-
-$("rate-input").addEventListener("input", e => {
-  const v = parseFloat(e.target.value);
-  if (!isNaN(v) && v > 0) { rate = v; save(); render(); }
-});
-
-$("filter-month").addEventListener("change", e => { filterMonth = e.target.value; render(); });
-$("clear-filter-btn").addEventListener("click", () => { filterMonth = ""; $("filter-month").value = ""; render(); });
-
-document.querySelectorAll(".sort-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const k = btn.dataset.key;
-    if (sortKey === k) sortDir = sortDir === "asc" ? "desc" : "asc";
-    else { sortKey = k; sortDir = "asc"; }
-    render();
-  });
-});
-
-["f-notes","f-purpose"].forEach(id => $(id).addEventListener("keydown", e => { if (e.key === "Enter") submitForm(); }));
+["fpurp","fnotes"].forEach(id=>$(id).onkeydown=e=>{if(e.key==="Enter")doSubmit()});
 
 // ── Init ──
 load();
-$("rate-input").value = rate;
-$("f-date").value     = todayStr();
+$("rate").value=rate;
+$("fdate").value=today();
 render();
-
-const key = getSavedKey();
-if (key && key.startsWith("AIza")) { hideModal(); loadGoogleMaps(key); }
+const key=getKey();
+if(key&&key.startsWith("AIza")){hideModal();loadMaps(key);}
 else showModal();
 </script>
 </body>
