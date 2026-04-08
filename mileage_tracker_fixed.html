@@ -132,6 +132,7 @@ tfoot tr{background:var(--bg);border-top:2px solid var(--b1)}tfoot td{font-weigh
     <span style="color:var(--mu);font-size:12px">$/mi</span>
     <input type="number" class="inp" id="rateinp" value="0.67" step="0.01" min="0" style="width:72px;text-align:center"/>
     <button class="btn btn-g" id="expbtn">↓ Export CSV</button>
+    <button class="btn btn-g" id="bbtn">⊞ Batch Add</button>
     <button class="btn btn-p" id="addbtn">+ Add Trip</button>
   </div>
 </div>
@@ -169,6 +170,35 @@ tfoot tr{background:var(--bg);border-top:2px solid var(--b1)}tfoot td{font-weigh
       <div><div class="flbl">Notes</div><input type="text" class="inp" id="fnotes" placeholder="Venue, account, context..."/></div>
       <button class="btn btn-p" id="subbtn" style="height:36px">Add</button>
       <button class="btn btn-g" id="canbtn" style="height:36px">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Batch Add Panel -->
+  <div id="bwrap" style="display:none;background:var(--sur);border:1px solid var(--b2);border-radius:10px;padding:22px;margin-bottom:22px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+      <div class="ftitle" style="margin:0">⊞ Batch Add Trips</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span id="bhint" style="font-size:11px;color:var(--mu)"></span>
+        <button class="btn btn-g" id="baddrow">+ Add Row</button>
+        <button class="btn btn-p" id="bsavebtn">Save All</button>
+        <button class="btn btn-g" id="bcanbtn">Cancel</button>
+      </div>
+    </div>
+    <div style="overflow-x:auto;border-radius:8px;border:1px solid var(--b1)">
+      <table style="width:100%;border-collapse:collapse;min-width:940px">
+        <thead>
+          <tr style="background:var(--bg);border-bottom:1px solid var(--b1)">
+            <th style="padding:8px 10px;text-align:left;color:var(--mu);font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;white-space:nowrap;min-width:130px">Date</th>
+            <th style="padding:8px 10px;text-align:left;color:var(--mu);font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;min-width:190px">From</th>
+            <th style="padding:8px 10px;text-align:left;color:var(--mu);font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;min-width:190px">To</th>
+            <th style="padding:8px 10px;text-align:left;color:var(--mu);font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;min-width:88px">Miles</th>
+            <th style="padding:8px 10px;text-align:left;color:var(--mu);font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;min-width:140px">Purpose</th>
+            <th style="padding:8px 10px;text-align:left;color:var(--mu);font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;min-width:150px">Notes</th>
+            <th style="padding:8px 10px;min-width:80px"></th>
+          </tr>
+        </thead>
+        <tbody id="btbody"></tbody>
+      </table>
     </div>
   </div>
 
@@ -273,22 +303,18 @@ function initMaps(key){
 }
 
 // ── Autocomplete using AutocompleteSuggestion (new Places API) ──
-function wireAC(inpId, dropId, onPick){
-  const inp=$(inpId), drop=$(dropId);
+// Core wiring — accepts element refs directly (used by both main form and batch rows)
+function wireACEl(inp, drop, onPick){
   let timer=null, items=[], hi=-1;
-
   inp.addEventListener("input",()=>{
     const q=inp.value.trim();
-    hi=-1; items=[];
-    // Reset address when user types
-    if(inpId==="ffrom")fromAddr=""; else toAddr="";
+    hi=-1;items=[];
     clearTimeout(timer);
     if(q.length<2){drop.classList.remove("show");drop.innerHTML="";return}
     drop.innerHTML=`<div class="acn">Searching...</div>`;
     drop.classList.add("show");
     timer=setTimeout(()=>fetchSuggestions(q,drop,inp,onPick,arr=>{items=arr;hi=-1}),280);
   });
-
   inp.addEventListener("keydown",e=>{
     if(!drop.classList.contains("show"))return;
     if(e.key==="ArrowDown"){e.preventDefault();hi=Math.min(hi+1,items.length-1);hilite(drop,hi)}
@@ -296,10 +322,15 @@ function wireAC(inpId, dropId, onPick){
     else if(e.key==="Enter"&&hi>=0){e.preventDefault();drop.querySelectorAll(".aci")[hi]?.dispatchEvent(new Event("mousedown"))}
     else if(e.key==="Escape")drop.classList.remove("show");
   });
-
   document.addEventListener("click",e=>{
     if(!inp.contains(e.target)&&!drop.contains(e.target))drop.classList.remove("show");
   });
+}
+// Main-form wrapper — also resets global fromAddr/toAddr when user edits
+function wireAC(inpId, dropId, onPick){
+  const inp=$(inpId), drop=$(dropId);
+  inp.addEventListener("input",()=>{if(inpId==="ffrom")fromAddr=""; else toAddr=""});
+  wireACEl(inp, drop, onPick);
 }
 
 function hilite(drop,hi){
@@ -452,12 +483,143 @@ function doContinue(id){
   $("fto").focus();
 }
 
+// ── Batch Add ──
+let batchRows=[], batchFromA={}, batchToA={};
+
+function openBatch(){
+  if($("fwrap").classList.contains("open"))closeForm();
+  batchRows=[{date:today(),from:'',to:'',miles:'',purpose:'Client Meeting',notes:''}];
+  batchFromA={0:''};batchToA={0:''};
+  $("bwrap").style.display='block';
+  renderBatch();
+  setTimeout(()=>$("btbody").querySelector('.bf-from')?.focus(),80);
+}
+function closeBatch(){
+  $("bwrap").style.display='none';
+  batchRows=[];batchFromA={};batchToA={};
+}
+function renderBatch(){
+  const tb=$("btbody");
+  tb.innerHTML='';
+  batchRows.forEach((row,i)=>{
+    const tr=document.createElement('tr');
+    tr.style.borderBottom='1px solid var(--b1)';
+    tr.innerHTML=`
+      <td style="padding:5px 7px">
+        <input class="inp" type="date" value="${row.date}" style="font-size:11px;width:122px" oninput="batchRows[${i}].date=this.value"/>
+      </td>
+      <td style="padding:5px 7px;position:relative">
+        <div class="acw">
+          <input class="inp bf-from" type="text" value="${esc(row.from)}" placeholder="From…" autocomplete="off" spellcheck="false" style="font-size:11px" data-i="${i}"/>
+          <div class="acd" id="bdfr${i}"></div>
+        </div>
+      </td>
+      <td style="padding:5px 7px;position:relative">
+        <div class="acw">
+          <input class="inp bf-to" type="text" value="${esc(row.to)}" placeholder="To…" autocomplete="off" spellcheck="false" style="font-size:11px" data-i="${i}"/>
+          <div class="acd" id="bdto${i}"></div>
+        </div>
+      </td>
+      <td style="padding:5px 7px">
+        <div class="mw" id="bmw${i}">
+          <input class="inp bf-mi" type="number" value="${row.miles||''}" placeholder="Auto" step="0.1" min="0" style="font-size:11px;width:76px" oninput="batchRows[${i}].miles=this.value"/>
+          <div class="spin"></div>
+        </div>
+      </td>
+      <td style="padding:5px 7px">
+        <select class="inp" style="font-size:11px" onchange="batchRows[${i}].purpose=this.value">
+          ${PURPOSES.map(p=>`<option${p===row.purpose?' selected':''}>${esc(p)}</option>`).join('')}
+        </select>
+      </td>
+      <td style="padding:5px 7px">
+        <input class="inp" type="text" value="${esc(row.notes||'')}" placeholder="Notes…" style="font-size:11px" oninput="batchRows[${i}].notes=this.value"/>
+      </td>
+      <td style="padding:5px 7px;white-space:nowrap">
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-e" style="padding:3px 9px;font-size:11px" onclick="chainBatch(${i})" title="Add next stop from this destination">→</button>
+          <button class="btn btn-d" style="padding:3px 8px;font-size:11px" onclick="delBatchRow(${i})">✕</button>
+        </div>
+      </td>`;
+    tb.appendChild(tr);
+  });
+  batchRows.forEach((_,i)=>wireBatchAC(i));
+  updateBatchHint();
+}
+function wireBatchAC(i){
+  const froms=$("btbody").querySelectorAll('.bf-from');
+  const tos=$("btbody").querySelectorAll('.bf-to');
+  const fDrop=$(`bdfr${i}`), tDrop=$(`bdto${i}`);
+  if(froms[i]&&fDrop) wireACEl(froms[i],fDrop,addr=>{batchRows[i].from=addr;batchFromA[i]=addr;tryBatchDist(i)});
+  if(tos[i]&&tDrop)   wireACEl(tos[i],tDrop,  addr=>{batchRows[i].to=addr;  batchToA[i]=addr;  tryBatchDist(i)});
+}
+function tryBatchDist(i){
+  const f=batchFromA[i],t=batchToA[i];
+  if(!f||!t||!distSvc)return;
+  $(`bmw${i}`)?.classList.add('loading');
+  distSvc.getDistanceMatrix(
+    {origins:[f],destinations:[t],travelMode:google.maps.TravelMode.DRIVING,unitSystem:google.maps.UnitSystem.IMPERIAL},
+    (res,status)=>{
+      $(`bmw${i}`)?.classList.remove('loading');
+      if(status==="OK"&&res.rows[0].elements[0].status==="OK"){
+        const mi=Math.round(res.rows[0].elements[0].distance.value/1609.344*10)/10;
+        batchRows[i].miles=mi;
+        const miInp=$("btbody").querySelectorAll('.bf-mi')[i];
+        if(miInp){miInp.value=mi;miInp.classList.add('ok')}
+        updateBatchHint();
+      }
+    }
+  );
+}
+function chainBatch(i){
+  // Insert a new row right after row i, pre-filling From with row i's To
+  const dest=batchRows[i].to||'';
+  batchRows.splice(i+1,0,{date:today(),from:dest,to:'',miles:'',purpose:batchRows[i].purpose||'Client Meeting',notes:''});
+  // Shift address maps for rows i+2 and above
+  for(let j=batchRows.length-1;j>i+1;j--){batchFromA[j]=batchFromA[j-1]||'';batchToA[j]=batchToA[j-1]||''}
+  batchFromA[i+1]=batchToA[i]||dest;batchToA[i+1]='';
+  renderBatch();
+  setTimeout(()=>$("btbody").querySelectorAll('.bf-to')[i+1]?.focus(),60);
+}
+function addBatchRow(){
+  const n=batchRows.length;
+  batchRows.push({date:today(),from:'',to:'',miles:'',purpose:'Client Meeting',notes:''});
+  batchFromA[n]='';batchToA[n]='';
+  renderBatch();
+  setTimeout(()=>$("btbody").querySelectorAll('.bf-from')[n]?.focus(),60);
+}
+function delBatchRow(i){
+  if(batchRows.length<=1)return;
+  batchRows.splice(i,1);
+  const nf={},nt={};
+  batchRows.forEach((_,j)=>{nf[j]=batchFromA[j>=i?j+1:j]||'';nt[j]=batchToA[j>=i?j+1:j]||''});
+  batchFromA=nf;batchToA=nt;
+  renderBatch();
+}
+function saveBatch(){
+  let saved=0,skipped=0;
+  batchRows.forEach(row=>{
+    const mi=parseFloat(row.miles);
+    if(row.date&&row.from.trim()&&row.to.trim()&&!isNaN(mi)&&mi>0){trips.push({...row,miles:mi,id:uid()});saved++}
+    else skipped++;
+  });
+  if(saved===0){$("bhint").textContent='Nothing saved — each row needs Date, From, To, and Miles.';$("bhint").style.color='var(--re)';return}
+  save();render();closeBatch();
+}
+function updateBatchHint(){
+  const h=$("bhint");
+  const ready=batchRows.filter(r=>r.from&&r.to&&parseFloat(r.miles)>0).length;
+  h.textContent=`${batchRows.length} row${batchRows.length!==1?'s':''} · ${ready} ready to save`;
+  h.style.color='var(--mu)';
+}
+
 // ── Events ──
 $("addbtn").onclick=()=>{
   if($("fwrap").classList.contains("open")&&!editId)closeForm();
   else if(!$("fwrap").classList.contains("open")){clearForm();openForm(false);$("ffrom").focus()}
 };
 $("canbtn").onclick=closeForm;$("subbtn").onclick=doSubmit;
+$("bbtn").onclick=()=>{if($("bwrap").style.display==='block')closeBatch();else openBatch()};
+$("bcanbtn").onclick=closeBatch;$("bsavebtn").onclick=saveBatch;$("baddrow").onclick=addBatchRow;
 $("expbtn").onclick=()=>{
   const f=getF();
   const blob=new Blob(["Date,From,To,Miles,Purpose,Notes,Reimbursement\n"+f.map(r=>`${r.date},"${r.from}","${r.to}",${r.miles},"${r.purpose}","${r.notes||""}",${(+r.miles*rate).toFixed(2)}`).join("\n")],{type:"text/csv"});
